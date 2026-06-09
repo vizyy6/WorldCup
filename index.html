@@ -30,6 +30,8 @@
     -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   .sub{color:var(--mut);font-size:15px;margin-top:8px}.sub b{color:var(--txt)}
   .host{margin-top:12px;font-size:22px;letter-spacing:6px}
+  .by{margin-top:12px;font-size:13px;color:var(--mut);letter-spacing:1.5px;direction:ltr}
+  .by span{color:var(--gold);font-weight:800}
   .status{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-size:13px;color:var(--mut)}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--mut)}
   .dot.live{background:var(--accent);box-shadow:0 0 0 0 rgba(0,224,164,.5);animation:p 1.6s infinite}
@@ -69,8 +71,35 @@
   .scoreline{font-family:'Bebas Neue';font-size:28px;color:var(--gold);direction:ltr;line-height:.9;letter-spacing:1px}
   .stad{color:var(--txt);font-size:12.5px;font-weight:700;direction:rtl;text-align:left;line-height:1.25}
   .city{color:var(--mut);font-size:12px;direction:rtl;text-align:left}
+  .livep{font-size:11px;font-weight:800;color:#1fe3aa;background:rgba(0,224,164,.14);border:1px solid rgba(0,224,164,.45);padding:2px 9px;border-radius:6px}
+  .ns{font-size:10px;font-weight:700;color:var(--mut)}
+  .prob{grid-column:1/-1;margin-top:10px}
+  .pbar{display:flex;height:7px;border-radius:5px;overflow:hidden;background:var(--line)}
+  .pbar .pa{background:var(--accent)}.pbar .pb{background:#5b6fb0}
+  .plabels{display:flex;justify-content:space-between;align-items:center;margin-top:5px;font-size:11px;color:var(--mut)}
+  .plabels .va{color:var(--accent);font-weight:800;direction:ltr;display:flex;align-items:center;gap:5px}
+  .plabels .vb{color:#9fb0e6;font-weight:800;direction:ltr;display:flex;align-items:center;gap:5px}
+  .plabels .pf{font-size:15px}
+  .plabels .toq{font-size:9.5px;color:var(--mut)}
   .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--bg2);color:var(--mut);border:1px solid var(--line)}
   .tag.g{color:var(--accent)}.tag.k{color:var(--accent2);border-color:rgba(255,61,127,.3)}.tag.f{color:var(--gold);border-color:rgba(255,203,69,.4)}
+  .leg{color:var(--mut);font-size:12.5px;margin:0 4px 16px;display:flex;align-items:center;gap:8px}
+  .leg .dotg{width:11px;height:11px;border-radius:3px;background:rgba(0,224,164,.45);border:1px solid var(--accent);flex:0 0 auto}
+  .grpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+  .grpcard{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .grphd{background:var(--bg2);padding:10px 14px;font-weight:800;color:var(--accent);border-bottom:1px solid var(--line)}
+  .grptbl{width:100%;border-collapse:collapse;font-size:14px}
+  .grptbl th{color:var(--mut);font-weight:700;font-size:11px;padding:8px 4px;text-align:center}
+  .grptbl th:nth-child(2){text-align:right;padding-right:12px}
+  .grptbl td{padding:9px 4px;text-align:center;border-top:1px solid var(--line)}
+  .grptbl td.tm{text-align:right;padding-right:12px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .grptbl td.rk{color:var(--mut);font-weight:800;width:24px}
+  .grptbl td.pts{font-weight:900;color:var(--txt)}
+  .grptbl tr.adv{background:rgba(0,224,164,.05)}
+  .grptbl tr.adv td.rk{color:var(--accent)}
+  .grptbl tr.ksaRow{background:rgba(255,203,69,.10)}
+  .grptbl tr.ksaRow td.rk{color:var(--gold)}
+  .grptbl .flag{font-size:18px;width:22px;text-align:center;line-height:1}
   .note{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 20px;color:var(--mut);font-size:13.5px}
   .note b{color:var(--txt)}
   .empty{text-align:center;color:var(--mut);padding:40px 0}
@@ -84,6 +113,7 @@
   <h1>2026</h1>
   <div class="sub">الجدول الكامل · <b>بتوقيت الرياض</b></div>
   <div class="sub" style="margin-top:4px">١١ يونيو — ١٩ يوليو · ٤٨ منتخب · ١٠٤ مباراة</div>
+  <div class="by">by <span>Nawaf Almutairi</span></div>
   <div class="host">🇲🇽 🇺🇸 🇨🇦</div>
   <div class="status">
     <span class="dot" id="dot"></span><span id="statusTxt">جارٍ التحميل…</span>
@@ -163,9 +193,10 @@ function toKSA(dateStr,timeStr){
     const o=timeStr.match(/UTC([+-]\d{1,2})/i); if(o)off=+o[1];
   }
   // local = UTC + off  =>  UTC = local - off ; KSA = UTC + 3
-  const ms=Date.UTC(Y,Mo-1,D,hh,mm)-off*3600000+3*3600000;
+  const utc=Date.UTC(Y,Mo-1,D,hh,mm)-off*3600000;
+  const ms=utc+3*3600000;
   const d=new Date(ms);
-  return {ms,
+  return {ms, epoch:utc,
     day:d.getUTCDate()+" "+MON[d.getUTCMonth()],
     dow:DOW[d.getUTCDay()],
     time:String((d.getUTCHours()%12)||12).padStart(2,'0')+":"+String(d.getUTCMinutes()).padStart(2,'0'),
@@ -208,6 +239,24 @@ function scoreOf(m){
   // 3) حقول نصية مثل "2-1"
   for(const k of ['ft','result','fulltime']){if(typeof m[k]==='string'){const r=fromStr(m[k]);if(r)return r;}}
   return null;
+}
+/* تصنيف فيفا الرسمي لكل المنتخبات الـ48 (يونيو 2026) — يُستخدم لتوقع نسبة الفوز فقط */
+const RANK={
+ france:1,spain:2,argentina:3,england:4,portugal:5,brazil:6,netherlands:7,morocco:8,belgium:9,germany:10,
+ croatia:11,colombia:13,senegal:14,mexico:15,"united states":16,usa:16,uruguay:17,japan:18,switzerland:19,
+ iran:21,"ir iran":21,turkey:22,"türkiye":22,turkiye:22,ecuador:23,austria:24,"south korea":25,"korea republic":25,
+ australia:27,algeria:28,egypt:29,canada:30,norway:31,panama:33,"ivory coast":34,"cote d'ivoire":34,"côte d'ivoire":34,
+ sweden:38,paraguay:40,czechia:41,"czech republic":41,scotland:43,tunisia:44,"congo dr":46,"dr congo":46,
+ uzbekistan:50,qatar:55,iraq:57,"south africa":60,"saudi arabia":61,jordan:63,
+ "bosnia and herzegovina":65,"bosnia & herzegovina":65,"cape verde":69,"cabo verde":69,ghana:74,
+ curacao:82,"curaçao":82,haiti:83,"new zealand":85
+};
+function winProb(aKey,bKey){ // توقع بسيط من فرق الترتيب — ليس رقماً رسمياً
+  const ra=RANK[aKey], rb=RANK[bKey];
+  if(!ra||!rb) return null;
+  const pa=1/(1+Math.pow(10,(ra-rb)/80));
+  const a=Math.round(pa*100);
+  return [a, 100-a];
 }
 
 /* ===== الجدول الاحتياطي (يشتغل بدون نت) ===== */
@@ -266,7 +315,7 @@ const FB=[
 ["19 يوليو","الأحد",null,"فائز 101 × فائز 102","نيويورك/نيوجيرسي","10:00","م","final","النهائي"]
 ];
 function fromFallback(){
-  return FB.map((m,i)=>({order:i,day:m[0],dow:m[1],
+  return FB.map((m,i)=>({order:i,epoch:null,day:m[0],dow:m[1],
     t1:m[2]?arName(m[2]):null, t2:m[2]?arName(m[3]):[m[3],""], t1raw:m[2], t2raw:m[2]?m[3]:null,
     city:m[4],time:m[5],ap:m[6],stage:m[7],grp:m[8],score:null}));
 }
@@ -279,7 +328,7 @@ function fromLive(json){
     let t1,t2,t1raw,t2raw;
     if(c1&&c2){ t1=arName(m.team1); t2=arName(m.team2); t1raw=norm(m.team1); t2raw=norm(m.team2); }
     else { t1=null; t2=[decode(m.team1)+" × "+decode(m.team2),""]; t1raw=null; t2raw=null; }
-    out.push({order:k.ms,day:k.day,dow:k.dow,time:k.time,ap:k.ap,city:arCity(m.ground),
+    out.push({order:k.ms,epoch:k.epoch,day:k.day,dow:k.dow,time:k.time,ap:k.ap,city:arCity(m.ground),
       stage, grp, t1, t2, t1raw, t2raw, score:scoreOf(m)});
   });
   out.sort((a,b)=>a.order-b.order);
@@ -294,8 +343,43 @@ const ST={groups:["g","المجموعة"],r32:["k","دور 32"],r16:["k",""],qf:
 function teamRow(t,sc,win){
   return `<div class="team ${win?'win':''}"><span class="flag">${t[1]||"🏳️"}</span>${t[0]}${sc!=null?`<span class="sc">${sc}</span>`:''}</div>`;
 }
+function buildStandings(){
+  const groups={};
+  DATA.forEach(m=>{
+    if(m.stage!=='groups'||!m.t1raw||!m.t2raw)return;
+    const g=m.grp; groups[g]=groups[g]||{};
+    const ens=(k,nm)=>{if(!groups[g][k])groups[g][k]={key:k,name:nm[0],flag:nm[1],p:0,gf:0,ga:0,pts:0};return groups[g][k];};
+    const A=ens(m.t1raw,m.t1),B=ens(m.t2raw,m.t2);
+    if(m.score){const a=m.score[0],b=m.score[1];A.p++;B.p++;A.gf+=a;A.ga+=b;B.gf+=b;B.ga+=a;
+      if(a>b)A.pts+=3;else if(b>a)B.pts+=3;else{A.pts++;B.pts++;}}
+  });
+  const out={};
+  Object.keys(groups).sort().forEach(g=>{
+    out[g]=Object.values(groups[g]).sort((x,y)=>y.pts-x.pts||(y.gf-y.ga)-(x.gf-x.ga)||y.gf-x.gf||x.name.localeCompare(y.name,'ar'));
+  });
+  return out;
+}
+function renderStandings(){
+  const S=buildStandings(),keys=Object.keys(S);
+  if(!keys.length){empty.style.display='block';return;}
+  empty.style.display='none';
+  const lg=document.createElement('div');lg.className='leg';
+  lg.innerHTML='<span class="dotg"></span> أول منتخبين من كل مجموعة يتأهلون مباشرة، وأفضل ٨ مراكز ثالثة يلحقونهم لدور الـ٣٢.';
+  list.appendChild(lg);
+  const grid=document.createElement('div');grid.className='grpgrid';
+  keys.forEach(g=>{
+    let rows='';
+    S[g].forEach((t,i)=>{const gd=t.gf-t.ga,gds=(gd>0?'+':'')+gd,ksa=t.key==='saudi arabia';
+      rows+=`<tr class="${i<2?'adv':''} ${ksa?'ksaRow':''}"><td class="rk">${i+1}</td><td class="tm"><span class="flag">${t.flag}</span>${t.name}</td><td>${t.p}</td><td>${gds}</td><td class="pts">${t.pts}</td></tr>`;});
+    const card=document.createElement('div');card.className='grpcard';
+    card.innerHTML=`<div class="grphd">المجموعة ${g}</div><table class="grptbl"><thead><tr><th></th><th>المنتخب</th><th>لعب</th><th>+/-</th><th>نقاط</th></tr></thead><tbody>${rows}</tbody></table>`;
+    grid.appendChild(card);
+  });
+  list.appendChild(grid);
+}
 function render(){
   list.innerHTML='';
+  if(curFilter==='groups'){renderStandings();return;}
   const rows=DATA.filter(m=>{
     if(curFilter==='all')return true;
     if(curFilter==='ksa')return m.t1raw==='saudi arabia'||m.t2raw==='saudi arabia';
@@ -324,13 +408,21 @@ function render(){
     }
     const el=document.createElement('div');el.className='match'+(isKsa?' ksaM':'');
     const stad=STAD[m.city]||'';
-    const metaTop = sc
-      ? `<div class="ft">انتهت</div>`
-      : `<div><span class="time">${m.time}</span> <span class="ampm">${m.ap}</span></div>`;
+    const status = sc ? 'finished' : ((m.epoch && Date.now()>=m.epoch) ? 'live' : 'upcoming');
+    let metaTop;
+    if(status==='finished') metaTop=`<div class="ft">انتهت</div>`;
+    else if(status==='live') metaTop=`<div class="livep">● مباشر الآن</div>`;
+    else metaTop=`<div><span class="time">${m.time}</span> <span class="ampm">${m.ap}</span></div><div class="ns">● لم تبدأ</div>`;
+    let probHtml='';
+    if(status==='upcoming' && m.t1 && m.t1raw && m.t2raw){
+      const wp=winProb(m.t1raw,m.t2raw);
+      if(wp) probHtml=`<div class="prob"><div class="pbar"><span class="pa" style="width:${wp[0]}%"></span><span class="pb" style="width:${wp[1]}%"></span></div><div class="plabels"><span class="va"><span class="pf">${m.t1[1]}</span>${wp[0]}%</span><span class="toq">توقع الفوز حسب ترتيب الفيفا</span><span class="vb">${wp[1]}%<span class="pf">${m.t2[1]}</span></span></div></div>`;
+    }
     el.innerHTML=`<div class="teams">${teamsHtml}</div>
       <div class="meta">${metaTop}
       ${stad?`<div class="stad">${stad}</div>`:''}
-      <div class="city">${m.city}</div><div class="tag ${st[0]}">${label}</div></div>`;
+      <div class="city">${m.city}</div><div class="tag ${st[0]}">${label}</div></div>
+      ${probHtml}`;
     dg.appendChild(el);
   });
 }
