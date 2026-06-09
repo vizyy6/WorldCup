@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كأس العالم 2026 — الجدول الكامل بتوقيت الرياض</title>
+<meta name="description" content="جدول كأس العالم 2026 الكامل بتوقيت الرياض — كل المباريات والتواريخ والملاعب والنتائج المباشرة.">
+<meta property="og:title" content="كأس العالم 2026 — الجدول الكامل بتوقيت الرياض">
+<meta property="og:description" content="كل مباريات المونديال بتوقيت السعودية، مع النتائج المباشرة والأدوار الإقصائية.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e1a;--bg2:#0f1628;--card:#141d33;--card-hi:#1b2742;--line:#23304f;
+    --txt:#eaf0ff;--mut:#8593b3;--accent:#00e0a4;--accent2:#ff3d7f;--gold:#ffcb45;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Tajawal',sans-serif;line-height:1.5;padding-bottom:60px;-webkit-tap-highlight-color:transparent;
+    background:radial-gradient(1200px 600px at 80% -10%,rgba(0,224,164,.10),transparent 60%),
+      radial-gradient(1000px 500px at 0% 0%,rgba(255,61,127,.08),transparent 55%),var(--bg);color:var(--txt)}
+  .wrap{max-width:780px;margin:0 auto;padding:0 14px}
+  header{padding:34px 14px 18px;text-align:center}
+  .kick{font-size:13px;letter-spacing:3px;color:var(--accent);font-weight:700;margin-bottom:6px}
+  h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(46px,12vw,82px);line-height:.92;letter-spacing:1px;direction:ltr;
+    background:linear-gradient(120deg,#fff 10%,var(--accent) 50%,var(--accent2) 95%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{color:var(--mut);font-size:15px;margin-top:8px}.sub b{color:var(--txt)}
+  .host{margin-top:12px;font-size:22px;letter-spacing:6px}
+  .status{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-size:13px;color:var(--mut)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--mut)}
+  .dot.live{background:var(--accent);box-shadow:0 0 0 0 rgba(0,224,164,.5);animation:p 1.6s infinite}
+  .dot.err{background:var(--accent2)}
+  @keyframes p{0%{box-shadow:0 0 0 0 rgba(0,224,164,.5)}70%{box-shadow:0 0 0 8px rgba(0,224,164,0)}100%{box-shadow:0 0 0 0 rgba(0,224,164,0)}}
+  .refresh{background:var(--card);border:1px solid var(--line);color:var(--mut);border-radius:20px;
+    padding:5px 12px;font-family:'Tajawal';font-weight:700;font-size:12px;cursor:pointer}
+  .refresh:hover{color:var(--txt)}
+  .filters{position:sticky;top:0;z-index:30;background:rgba(10,14,26,.86);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:18px}
+  .frow{display:flex;gap:8px;overflow-x:auto;padding:0 14px;scrollbar-width:none}.frow::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;background:var(--card);border:1px solid var(--line);color:var(--mut);padding:8px 15px;
+    border-radius:30px;font-family:'Tajawal';font-weight:700;font-size:14px;cursor:pointer;transition:.2s;white-space:nowrap}
+  .chip:hover{color:var(--txt)}
+  .chip.on{background:linear-gradient(120deg,var(--accent),#00b389);color:#04221a;border-color:transparent}
+  .chip.ksaC.on{background:linear-gradient(120deg,var(--gold),#ffb000);color:#3a2600}
+  .daygroup{margin-bottom:26px}
+  .dayhead{display:flex;align-items:baseline;gap:10px;padding:6px 4px 12px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .dnum{font-family:'Bebas Neue';font-size:34px;color:var(--accent);line-height:1;direction:ltr}
+  .dwords{font-weight:800;font-size:17px}.ddow{color:var(--mut);font-size:14px;font-weight:500}
+  .match{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:10px;
+    display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;transition:.18s;position:relative;overflow:hidden}
+  .match:hover{background:var(--card-hi);transform:translateY(-2px)}
+  .match.ksaM{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset,0 6px 24px rgba(255,203,69,.10)}
+  .match.ksaM::before{content:"🇸🇦 السعودية";position:absolute;top:0;left:0;background:var(--gold);color:#3a2600;
+    font-size:11px;font-weight:800;padding:3px 10px;border-bottom-right-radius:10px}
+  .teams{display:flex;flex-direction:column;gap:7px;padding-top:2px}.match.ksaM .teams{padding-top:16px}
+  .team{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px}
+  .team .sc{margin-right:auto;font-family:'Bebas Neue';font-size:22px;color:var(--accent);direction:ltr}
+  .team.win .sc{color:var(--gold)}
+  .flag{font-size:22px;line-height:1;width:26px;text-align:center;flex:0 0 auto}
+  .vs{color:var(--mut);font-size:12px;font-weight:500;padding-right:35px}
+  .meta{text-align:left;direction:ltr;display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:108px}
+  .time{font-family:'Bebas Neue';font-size:30px;color:var(--txt);line-height:.9;letter-spacing:1px}
+  .ampm{font-size:13px;color:var(--accent);font-family:'Tajawal';font-weight:700}
+  .ft{font-size:11px;font-weight:800;color:var(--accent2);background:rgba(255,61,127,.12);border:1px solid rgba(255,61,127,.3);padding:2px 8px;border-radius:6px}
+  .scoreline{font-family:'Bebas Neue';font-size:28px;color:var(--gold);direction:ltr;line-height:.9;letter-spacing:1px}
+  .stad{color:var(--txt);font-size:12.5px;font-weight:700;direction:rtl;text-align:left;line-height:1.25}
+  .city{color:var(--mut);font-size:12px;direction:rtl;text-align:left}
+  .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--bg2);color:var(--mut);border:1px solid var(--line)}
+  .tag.g{color:var(--accent)}.tag.k{color:var(--accent2);border-color:rgba(255,61,127,.3)}.tag.f{color:var(--gold);border-color:rgba(255,203,69,.4)}
+  .note{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 20px;color:var(--mut);font-size:13.5px}
+  .note b{color:var(--txt)}
+  .empty{text-align:center;color:var(--mut);padding:40px 0}
+  footer{text-align:center;color:var(--mut);font-size:12px;margin-top:30px;padding:0 14px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kick">FIFA WORLD CUP</div>
+  <h1>2026</h1>
+  <div class="sub">الجدول الكامل · <b>بتوقيت الرياض</b></div>
+  <div class="sub" style="margin-top:4px">١١ يونيو — ١٩ يوليو · ٤٨ منتخب · ١٠٤ مباراة</div>
+  <div class="host">🇲🇽 🇺🇸 🇨🇦</div>
+  <div class="status">
+    <span class="dot" id="dot"></span><span id="statusTxt">جارٍ التحميل…</span>
+    <button class="refresh" id="refreshBtn">↻ تحديث</button>
+  </div>
+</header>
+
+<div class="filters">
+  <div class="frow" id="frow">
+    <button class="chip on" data-f="all">الكل</button>
+    <button class="chip ksaC" data-f="ksa">🇸🇦 السعودية</button>
+    <button class="chip" data-f="groups">المجموعات</button>
+    <button class="chip" data-f="r32">دور الـ32</button>
+    <button class="chip" data-f="r16">دور الـ16</button>
+    <button class="chip" data-f="qf">ربع النهائي</button>
+    <button class="chip" data-f="sf">نصف النهائي</button>
+    <button class="chip" data-f="final">النهائي</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="note">
+    التوقيت بتوقيت السعودية (الرياض)، ومباريات المنتخب السعودي 🇸🇦 مميّزة بالذهبي.
+  </div>
+  <div id="list"></div>
+  <div class="empty" id="empty" style="display:none">ما فيه مباريات في هذا التصنيف.</div>
+</div>
+
+<footer>التواريخ والتوقيتات قابلة للتعديل من المنظّمين</footer>
+
+<script>
+/* ===== خرائط الترجمة ===== */
+const NAME={ // الاسم الإنجليزي (مُطبّع) -> [عربي, علم]
+ "mexico":["المكسيك","🇲🇽"],"south africa":["جنوب أفريقيا","🇿🇦"],"south korea":["كوريا الجنوبية","🇰🇷"],"korea republic":["كوريا الجنوبية","🇰🇷"],
+ "czechia":["التشيك","🇨🇿"],"czech republic":["التشيك","🇨🇿"],"canada":["كندا","🇨🇦"],"bosnia and herzegovina":["البوسنة والهرسك","🇧🇦"],"bosnia & herzegovina":["البوسنة والهرسك","🇧🇦"],
+ "united states":["الولايات المتحدة","🇺🇸"],"usa":["الولايات المتحدة","🇺🇸"],"paraguay":["باراغواي","🇵🇾"],"qatar":["قطر","🇶🇦"],
+ "switzerland":["سويسرا","🇨🇭"],"brazil":["البرازيل","🇧🇷"],"morocco":["المغرب","🇲🇦"],"haiti":["هايتي","🇭🇹"],"scotland":["اسكتلندا","🏴󠁧󠁢󠁳󠁣󠁴󠁿"],
+ "australia":["أستراليا","🇦🇺"],"turkey":["تركيا","🇹🇷"],"türkiye":["تركيا","🇹🇷"],"turkiye":["تركيا","🇹🇷"],"germany":["ألمانيا","🇩🇪"],
+ "curacao":["كوراساو","🇨🇼"],"curaçao":["كوراساو","🇨🇼"],"netherlands":["هولندا","🇳🇱"],"japan":["اليابان","🇯🇵"],
+ "ivory coast":["ساحل العاج","🇨🇮"],"cote d'ivoire":["ساحل العاج","🇨🇮"],"côte d'ivoire":["ساحل العاج","🇨🇮"],"ecuador":["الإكوادور","🇪🇨"],
+ "tunisia":["تونس","🇹🇳"],"sweden":["السويد","🇸🇪"],"spain":["إسبانيا","🇪🇸"],"cape verde":["الرأس الأخضر","🇨🇻"],"cabo verde":["الرأس الأخضر","🇨🇻"],
+ "belgium":["بلجيكا","🇧🇪"],"egypt":["مصر","🇪🇬"],"saudi arabia":["السعودية","🇸🇦"],"uruguay":["أوروغواي","🇺🇾"],"iran":["إيران","🇮🇷"],"ir iran":["إيران","🇮🇷"],
+ "new zealand":["نيوزيلندا","🇳🇿"],"france":["فرنسا","🇫🇷"],"senegal":["السنغال","🇸🇳"],"iraq":["العراق","🇮🇶"],"norway":["النرويج","🇳🇴"],
+ "argentina":["الأرجنتين","🇦🇷"],"algeria":["الجزائر","🇩🇿"],"austria":["النمسا","🇦🇹"],"jordan":["الأردن","🇯🇴"],"portugal":["البرتغال","🇵🇹"],
+ "congo dr":["الكونغو الديمقراطية","🇨🇩"],"dr congo":["الكونغو الديمقراطية","🇨🇩"],"congo dr (kinshasa)":["الكونغو الديمقراطية","🇨🇩"],
+ "england":["إنجلترا","🏴󠁧󠁢󠁥󠁮󠁧󠁿"],"croatia":["كرواتيا","🇭🇷"],"ghana":["غانا","🇬🇭"],"panama":["بنما","🇵🇦"],"uzbekistan":["أوزبكستان","🇺🇿"],"colombia":["كولومبيا","🇨🇴"]
+};
+const CITY=[["mexico city","مدينة مكسيكو"],["guadalajara","غوادالاخارا"],["zapopan","غوادالاخارا"],["toronto","تورونتو"],
+ ["los angeles","لوس أنجلوس"],["inglewood","لوس أنجلوس"],["san francisco","سان فرانسيسكو"],["santa clara","سان فرانسيسكو"],["bay","سان فرانسيسكو"],
+ ["new york","نيويورك/نيوجيرسي"],["new jersey","نيويورك/نيوجيرسي"],["rutherford","نيويورك/نيوجيرسي"],["metlife","نيويورك/نيوجيرسي"],
+ ["boston","بوسطن"],["foxborough","بوسطن"],["vancouver","فانكوفر"],["houston","هيوستن"],["dallas","دالاس"],["arlington","دالاس"],
+ ["philadelphia","فيلادلفيا"],["monterrey","مونتيري"],["atlanta","أتلانتا"],["seattle","سياتل"],["miami","ميامي"],["kansas","كانساس سيتي"]];
+const STAD={ // اسم الملعب حسب المدينة (بالعربي)
+ "مدينة مكسيكو":"استاد مكسيكو سيتي (أزتيكا)","غوادالاخارا":"استاد أكرون","مونتيري":"استاد BBVA",
+ "تورونتو":"بي إم أو فيلد","فانكوفر":"بي سي بليس","لوس أنجلوس":"استاد سوفاي","سان فرانسيسكو":"استاد ليڤايز",
+ "سياتل":"لومن فيلد","نيويورك/نيوجيرسي":"استاد ميت لايف","بوسطن":"استاد جيليت","فيلادلفيا":"لينكولن فايننشال فيلد",
+ "أتلانتا":"استاد مرسيدس-بنز","ميامي":"استاد هارد روك","هيوستن":"استاد NRG","دالاس":"استاد AT&T","كانساس سيتي":"استاد آرو هيد"};
+
+function norm(s){return (s||"").toString().trim().toLowerCase().replace(/\s+/g,' ');}
+function arName(en){const k=norm(en);if(NAME[k])return NAME[k];
+  // ترجمة خفيفة لعناصر الأدوار الإقصائية
+  let t=en.replace(/Winner Match/gi,'فائز م').replace(/Winner/gi,'فائز').replace(/Runners?-?up/gi,'وصيف')
+        .replace(/Group/gi,'المجموعة').replace(/Match/gi,'م').replace(/3rd|Third/gi,'ثالث')
+        .replace(/place/gi,'').replace(/\bvs\b/gi,'×');
+  return [t,"🏳️"];}
+function arCity(g){const k=norm(g);for(const[en,ar]of CITY)if(k.includes(en))return ar;return g||"";}
+
+const MON=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const DOW=["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+
+/* يحوّل تاريخ+وقت openfootball (مثل 2026-06-11 و "13:00 UTC-6") إلى توقيت الرياض */
+function toKSA(dateStr,timeStr){
+  const [Y,Mo,D]=dateStr.split('-').map(Number);
+  let hh=0,mm=0,off=0;
+  if(timeStr){
+    const m=timeStr.match(/(\d{1,2}):(\d{2})/); if(m){hh=+m[1];mm=+m[2];}
+    const o=timeStr.match(/UTC([+-]\d{1,2})/i); if(o)off=+o[1];
+  }
+  // local = UTC + off  =>  UTC = local - off ; KSA = UTC + 3
+  const ms=Date.UTC(Y,Mo-1,D,hh,mm)-off*3600000+3*3600000;
+  const d=new Date(ms);
+  return {ms,
+    day:d.getUTCDate()+" "+MON[d.getUTCMonth()],
+    dow:DOW[d.getUTCDay()],
+    time:String((d.getUTCHours()%12)||12).padStart(2,'0')+":"+String(d.getUTCMinutes()).padStart(2,'0'),
+    ap:d.getUTCHours()<12?"ص":"م"};
+}
+function stageOf(round,group){
+  const r=norm(round);
+  if(group||r.startsWith('matchday')||r.startsWith('group'))return["groups",(group||'').replace(/group/i,'').trim()||""];
+  if(r.includes('third')||r.includes('3rd'))return["final","م. الثالث"];
+  if(r.includes('round of 32')||r.includes('1/16'))return["r32","دور 32"];
+  if(r.includes('round of 16')||r.includes('1/8'))return["r16","دور 16"];
+  if(r.includes('quarter'))return["qf","ربع النهائي"];
+  if(r.includes('semi'))return["sf","نصف النهائي"];
+  if(r.includes('final'))return["final","النهائي"];
+  return["r32",round||""];
+}
+function decode(x){ // يفك رموز الأدوار الإقصائية: 2A=ثاني A، W74=فائز 74، L101=خاسر 101
+  const k=norm(x); if(NAME[k])return NAME[k][0];
+  let m;
+  if(m=x.match(/^1([A-L])$/i))return "أول "+m[1].toUpperCase();
+  if(m=x.match(/^2([A-L])$/i))return "ثاني "+m[1].toUpperCase();
+  if(m=x.match(/^3(.+)$/))return "ثالث "+m[1].toUpperCase();
+  if(m=x.match(/^W(\d+)$/i))return "فائز "+m[1];
+  if(m=x.match(/^L(\d+)$/i))return "خاسر "+m[1];
+  return x;
+}
+function scoreOf(m){
+  const pair=(a,b)=>(Number.isFinite(+a)&&Number.isFinite(+b))?[+a,+b]:null;
+  const fromStr=s=>{const x=(s||'').toString().match(/(\d+)\s*[-:]\s*(\d+)/);return x?[+x[1],+x[2]]:null;};
+  // 1) كائن النتيجة (الصيغة القياسية في openfootball): {ft:[2,1]} أو {ft:"2-1"}
+  if(m.score){
+    if(Array.isArray(m.score.ft)&&m.score.ft.length>=2)return pair(m.score.ft[0],m.score.ft[1]);
+    if(typeof m.score.ft==='string'){const r=fromStr(m.score.ft);if(r)return r;}
+    if(Array.isArray(m.score)&&m.score.length>=2)return pair(m.score[0],m.score[1]);
+    if(typeof m.score==='string'){const r=fromStr(m.score);if(r)return r;}
+  }
+  // 2) حقول رقمية منفصلة
+  const cand=[['score1','score2'],['goals1','goals2'],['team1_score','team2_score'],['ft1','ft2'],['homeScore','awayScore']];
+  for(const[a,b]of cand){if(m[a]!=null&&m[b]!=null){const r=pair(m[a],m[b]);if(r)return r;}}
+  // 3) حقول نصية مثل "2-1"
+  for(const k of ['ft','result','fulltime']){if(typeof m[k]==='string'){const r=fromStr(m[k]);if(r)return r;}}
+  return null;
+}
+
+/* ===== الجدول الاحتياطي (يشتغل بدون نت) ===== */
+const FB=[
+["11 يونيو","الخميس","mexico","south africa","مدينة مكسيكو","10:00","م","groups","A"],["12 يونيو","الجمعة","south korea","czechia","غوادالاخارا","05:00","ص","groups","A"],
+["12 يونيو","الجمعة","canada","bosnia and herzegovina","تورونتو","10:00","م","groups","B"],["13 يونيو","السبت","united states","paraguay","لوس أنجلوس","04:00","ص","groups","D"],
+["13 يونيو","السبت","qatar","switzerland","سان فرانسيسكو","10:00","م","groups","B"],["14 يونيو","الأحد","brazil","morocco","نيويورك/نيوجيرسي","01:00","ص","groups","C"],
+["14 يونيو","الأحد","haiti","scotland","بوسطن","04:00","ص","groups","C"],["14 يونيو","الأحد","australia","turkey","فانكوفر","07:00","ص","groups","D"],
+["14 يونيو","الأحد","germany","curacao","هيوستن","08:00","م","groups","E"],["14 يونيو","الأحد","netherlands","japan","دالاس","11:00","م","groups","F"],
+["15 يونيو","الإثنين","ivory coast","ecuador","فيلادلفيا","02:00","ص","groups","E"],["15 يونيو","الإثنين","tunisia","sweden","مونتيري","05:00","ص","groups","F"],
+["15 يونيو","الإثنين","spain","cape verde","أتلانتا","07:00","م","groups","H"],["15 يونيو","الإثنين","belgium","egypt","سياتل","10:00","م","groups","G"],
+["16 يونيو","الثلاثاء","saudi arabia","uruguay","ميامي","01:00","ص","groups","H"],["16 يونيو","الثلاثاء","iran","new zealand","لوس أنجلوس","04:00","ص","groups","G"],
+["16 يونيو","الثلاثاء","france","senegal","نيويورك/نيوجيرسي","10:00","م","groups","I"],["17 يونيو","الأربعاء","iraq","norway","بوسطن","01:00","ص","groups","I"],
+["17 يونيو","الأربعاء","argentina","algeria","كانساس سيتي","04:00","ص","groups","J"],["17 يونيو","الأربعاء","austria","jordan","سان فرانسيسكو","07:00","ص","groups","J"],
+["17 يونيو","الأربعاء","portugal","congo dr","هيوستن","08:00","م","groups","K"],["17 يونيو","الأربعاء","england","croatia","دالاس","11:00","م","groups","L"],
+["18 يونيو","الخميس","ghana","panama","تورونتو","02:00","ص","groups","L"],["18 يونيو","الخميس","uzbekistan","colombia","مدينة مكسيكو","05:00","ص","groups","K"],
+["18 يونيو","الخميس","czechia","south africa","أتلانتا","07:00","م","groups","A"],["18 يونيو","الخميس","switzerland","bosnia and herzegovina","لوس أنجلوس","10:00","م","groups","B"],
+["19 يونيو","الجمعة","canada","qatar","فانكوفر","01:00","ص","groups","B"],["19 يونيو","الجمعة","mexico","south korea","غوادالاخارا","04:00","ص","groups","A"],
+["19 يونيو","الجمعة","united states","australia","سياتل","10:00","م","groups","D"],["19 يونيو","الجمعة","scotland","morocco","بوسطن","10:00","م","groups","C"],
+["20 يونيو","السبت","brazil","haiti","فيلادلفيا","04:00","ص","groups","C"],["20 يونيو","السبت","turkey","paraguay","سان فرانسيسكو","07:00","ص","groups","D"],
+["20 يونيو","السبت","netherlands","sweden","هيوستن","08:00","م","groups","F"],["20 يونيو","السبت","germany","ivory coast","تورونتو","11:00","م","groups","E"],
+["21 يونيو","الأحد","ecuador","curacao","كانساس سيتي","03:00","ص","groups","E"],["21 يونيو","الأحد","tunisia","japan","مونتيري","07:00","ص","groups","F"],
+["21 يونيو","الأحد","spain","saudi arabia","أتلانتا","07:00","م","groups","H"],["21 يونيو","الأحد","belgium","iran","لوس أنجلوس","10:00","م","groups","G"],
+["22 يونيو","الإثنين","uruguay","cape verde","ميامي","01:00","ص","groups","H"],["22 يونيو","الإثنين","new zealand","egypt","فانكوفر","04:00","ص","groups","G"],
+["22 يونيو","الإثنين","argentina","austria","دالاس","08:00","م","groups","J"],["23 يونيو","الثلاثاء","france","iraq","فيلادلفيا","12:00","ص","groups","I"],
+["23 يونيو","الثلاثاء","norway","senegal","نيويورك/نيوجيرسي","03:00","ص","groups","I"],["23 يونيو","الثلاثاء","jordan","algeria","سان فرانسيسكو","06:00","ص","groups","J"],
+["23 يونيو","الثلاثاء","portugal","uzbekistan","هيوستن","08:00","م","groups","K"],["23 يونيو","الثلاثاء","england","ghana","بوسطن","11:00","م","groups","L"],
+["24 يونيو","الأربعاء","panama","croatia","تورونتو","02:00","ص","groups","L"],["24 يونيو","الأربعاء","colombia","congo dr","غوادالاخارا","05:00","ص","groups","K"],
+["24 يونيو","الأربعاء","switzerland","canada","فانكوفر","10:00","م","groups","B"],["24 يونيو","الأربعاء","bosnia and herzegovina","qatar","سياتل","10:00","م","groups","B"],
+["25 يونيو","الخميس","brazil","scotland","ميامي","01:00","ص","groups","C"],["25 يونيو","الخميس","morocco","haiti","أتلانتا","01:00","ص","groups","C"],
+["25 يونيو","الخميس","mexico","czechia","مدينة مكسيكو","04:00","ص","groups","A"],["25 يونيو","الخميس","south korea","south africa","مونتيري","04:00","ص","groups","A"],
+["25 يونيو","الخميس","ecuador","germany","نيويورك/نيوجيرسي","11:00","م","groups","E"],["25 يونيو","الخميس","curacao","ivory coast","فيلادلفيا","11:00","م","groups","E"],
+["26 يونيو","الجمعة","tunisia","netherlands","كانساس سيتي","02:00","ص","groups","F"],["26 يونيو","الجمعة","japan","sweden","دالاس","02:00","ص","groups","F"],
+["26 يونيو","الجمعة","united states","turkey","لوس أنجلوس","05:00","ص","groups","D"],["26 يونيو","الجمعة","paraguay","australia","سان فرانسيسكو","05:00","ص","groups","D"],
+["26 يونيو","الجمعة","norway","france","بوسطن","10:00","م","groups","I"],["26 يونيو","الجمعة","senegal","iraq","تورونتو","10:00","م","groups","I"],
+["27 يونيو","السبت","uruguay","spain","غوادالاخارا","03:00","ص","groups","H"],["27 يونيو","السبت","cape verde","saudi arabia","هيوستن","03:00","ص","groups","H"],
+["27 يونيو","السبت","new zealand","belgium","فانكوفر","06:00","ص","groups","G"],["27 يونيو","السبت","egypt","iran","سياتل","06:00","ص","groups","G"],
+["28 يونيو","الأحد","panama","england","نيويورك/نيوجيرسي","12:00","ص","groups","L"],["28 يونيو","الأحد","croatia","ghana","فيلادلفيا","12:00","ص","groups","L"],
+["28 يونيو","الأحد","colombia","portugal","ميامي","02:30","ص","groups","K"],["28 يونيو","الأحد","congo dr","uzbekistan","أتلانتا","02:30","ص","groups","K"],
+["28 يونيو","الأحد","argentina","jordan","دالاس","05:00","ص","groups","J"],["28 يونيو","الأحد","algeria","austria","كانساس سيتي","05:00","ص","groups","J"],
+["28 يونيو","الأحد",null,"ثاني A × ثاني B","لوس أنجلوس","10:00","م","r32","#73"],["29 يونيو","الإثنين",null,"أول C × ثاني F","هيوستن","08:00","م","r32","#76"],
+["29 يونيو","الإثنين",null,"أول E × ثالث (A/B/C/D/F)","بوسطن","11:30","م","r32","#74"],["30 يونيو","الثلاثاء",null,"أول F × ثاني C","مونتيري","04:00","ص","r32","#75"],
+["30 يونيو","الثلاثاء",null,"ثاني E × ثاني I","دالاس","08:00","م","r32","#78"],["1 يوليو","الأربعاء",null,"أول I × ثالث (C/D/F/G/H)","نيويورك/نيوجيرسي","12:00","ص","r32","#77"],
+["1 يوليو","الأربعاء",null,"أول A × ثالث (C/E/F/H/I)","مدينة مكسيكو","04:00","ص","r32","#79"],["1 يوليو","الأربعاء",null,"أول L × ثالث (E/H/I/J/K)","أتلانتا","07:00","م","r32","#80"],
+["1 يوليو","الأربعاء",null,"أول G × ثالث (A/E/H/I/J)","سياتل","11:00","م","r32","#82"],["2 يوليو","الخميس",null,"أول D × ثالث (B/E/F/I/J)","سان فرانسيسكو","03:00","ص","r32","#81"],
+["2 يوليو","الخميس",null,"أول H × ثاني J","لوس أنجلوس","10:00","م","r32","#84"],["3 يوليو","الجمعة",null,"ثاني K × ثاني L","تورونتو","02:00","ص","r32","#83"],
+["3 يوليو","الجمعة",null,"أول B × ثالث (D/E/I/J/L)","فانكوفر","06:00","ص","r32","#85"],["3 يوليو","الجمعة",null,"ثاني D × ثاني G","دالاس","09:00","م","r32","#88"],
+["4 يوليو","السبت",null,"أول J × ثاني H","ميامي","01:00","ص","r32","#86"],["4 يوليو","السبت",null,"أول K × ثالث (D/E/I/J/L)","كانساس سيتي","04:30","ص","r32","#87"],
+["4 يوليو","السبت",null,"فائز 87 × فائز 88","هيوستن","08:00","م","r16","#90"],["5 يوليو","الأحد",null,"فائز 74 × فائز 77","فيلادلفيا","12:00","ص","r16","#89"],
+["5 يوليو","الأحد",null,"فائز 73 × فائز 75","نيويورك/نيوجيرسي","11:00","م","r16","#91"],["6 يوليو","الإثنين",null,"فائز 76 × فائز 79","مدينة مكسيكو","03:00","ص","r16","#92"],
+["6 يوليو","الإثنين",null,"فائز 80 × فائز 82","دالاس","10:00","م","r16","#93"],["7 يوليو","الثلاثاء",null,"فائز 78 × فائز 81","سياتل","03:00","ص","r16","#94"],
+["7 يوليو","الثلاثاء",null,"فائز 83 × فائز 84","أتلانتا","07:00","م","r16","#95"],["7 يوليو","الثلاثاء",null,"فائز 85 × فائز 86","فانكوفر","11:00","م","r16","#96"],
+["9 يوليو","الخميس",null,"فائز 89 × فائز 90","بوسطن","11:00","م","qf","#97"],["10 يوليو","الجمعة",null,"فائز 93 × فائز 94","لوس أنجلوس","10:00","م","qf","#98"],
+["12 يوليو","الأحد",null,"فائز 91 × فائز 92","ميامي","12:00","ص","qf","#99"],["12 يوليو","الأحد",null,"فائز 95 × فائز 96","كانساس سيتي","04:00","ص","qf","#100"],
+["14 يوليو","الثلاثاء",null,"فائز 97 × فائز 98","دالاس","10:00","م","sf","#101"],["15 يوليو","الأربعاء",null,"فائز 99 × فائز 100","أتلانتا","10:00","م","sf","#102"],
+["19 يوليو","الأحد",null,"فائز 101 × فائز 102","نيويورك/نيوجيرسي","10:00","م","final","النهائي"]
+];
+function fromFallback(){
+  return FB.map((m,i)=>({order:i,day:m[0],dow:m[1],
+    t1:m[2]?arName(m[2]):null, t2:m[2]?arName(m[3]):[m[3],""], t1raw:m[2], t2raw:m[2]?m[3]:null,
+    city:m[4],time:m[5],ap:m[6],stage:m[7],grp:m[8],score:null}));
+}
+function fromLive(json){
+  const out=[];
+  (json.matches||[]).forEach((m)=>{
+    const k=toKSA(m.date,m.time);
+    const [stage,grp]=stageOf(m.round,m.group);
+    const c1=NAME[norm(m.team1)], c2=NAME[norm(m.team2)];
+    let t1,t2,t1raw,t2raw;
+    if(c1&&c2){ t1=arName(m.team1); t2=arName(m.team2); t1raw=norm(m.team1); t2raw=norm(m.team2); }
+    else { t1=null; t2=[decode(m.team1)+" × "+decode(m.team2),""]; t1raw=null; t2raw=null; }
+    out.push({order:k.ms,day:k.day,dow:k.dow,time:k.time,ap:k.ap,city:arCity(m.ground),
+      stage, grp, t1, t2, t1raw, t2raw, score:scoreOf(m)});
+  });
+  out.sort((a,b)=>a.order-b.order);
+  return out;
+}
+
+/* ===== العرض ===== */
+const list=document.getElementById('list'),empty=document.getElementById('empty');
+let DATA=fromFallback(), curFilter='all';
+const ST={groups:["g","المجموعة"],r32:["k","دور 32"],r16:["k",""],qf:["k","ربع"],sf:["k","نصف"],final:["f","النهائي"]};
+
+function teamRow(t,sc,win){
+  return `<div class="team ${win?'win':''}"><span class="flag">${t[1]||"🏳️"}</span>${t[0]}${sc!=null?`<span class="sc">${sc}</span>`:''}</div>`;
+}
+function render(){
+  list.innerHTML='';
+  const rows=DATA.filter(m=>{
+    if(curFilter==='all')return true;
+    if(curFilter==='ksa')return m.t1raw==='saudi arabia'||m.t2raw==='saudi arabia';
+    return m.stage===curFilter;
+  });
+  if(!rows.length){empty.style.display='block';return}
+  empty.style.display='none';
+  let lastDay=null,dg=null;
+  rows.forEach(m=>{
+    if(m.day!==lastDay){
+      dg=document.createElement('div');dg.className='daygroup';
+      const p=m.day.split(' ');
+      dg.innerHTML=`<div class="dayhead"><span class="dnum">${p[0]}</span><span class="dwords">${p[1]}</span><span class="ddow">${m.dow}</span></div>`;
+      list.appendChild(dg);lastDay=m.day;
+    }
+    const isKsa=(m.t1raw==='saudi arabia'||m.t2raw==='saudi arabia');
+    const st=ST[m.stage]||["k",""];
+    const label=m.stage==='groups'?`${st[1]} ${m.grp}`:(m.grp||'النهائي');
+    const sc=m.score;
+    let teamsHtml;
+    if(m.t1){
+      teamsHtml=teamRow(m.t1,sc?sc[0]:null,sc&&sc[0]>sc[1])+`<div class="vs">×</div>`+teamRow(m.t2,sc?sc[1]:null,sc&&sc[1]>sc[0]);
+    }else{
+      const parts=m.t2[0].split(' × ');
+      teamsHtml=`<div class="team" style="font-size:15px">${parts[0]}</div><div class="vs">×</div><div class="team" style="font-size:15px">${parts[1]||''}</div>`;
+    }
+    const el=document.createElement('div');el.className='match'+(isKsa?' ksaM':'');
+    const stad=STAD[m.city]||'';
+    const metaTop = sc
+      ? `<div class="ft">انتهت</div><div class="scoreline">${sc[0]} - ${sc[1]}</div>`
+      : `<div><span class="time">${m.time}</span> <span class="ampm">${m.ap}</span></div>`;
+    el.innerHTML=`<div class="teams">${teamsHtml}</div>
+      <div class="meta">${metaTop}
+      ${stad?`<div class="stad">${stad}</div>`:''}
+      <div class="city">${m.city}</div><div class="tag ${st[0]}">${label}</div></div>`;
+    dg.appendChild(el);
+  });
+}
+function setStatus(state,txt){
+  const d=document.getElementById('dot');d.className='dot'+(state?' '+state:'');
+  document.getElementById('statusTxt').textContent=txt;
+}
+async function loadLive(){
+  setStatus('','جارٍ التحديث…');
+  const urls=[
+    "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json",
+    "https://cdn.jsdelivr.net/gh/openfootball/worldcup.json@master/2026/worldcup.json"
+  ];
+  for(const u of urls){
+    try{
+      const r=await fetch(u,{cache:'no-store'}); if(!r.ok)continue;
+      const j=await r.json(); const live=fromLive(j);
+      if(live.length){DATA=live;render();
+        const now=new Date();const hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0');
+        setStatus('live',`محدّث مباشرة · ${hh}:${mm}`);return;}
+    }catch(e){}
+  }
+  setStatus('err','تعذّر الاتصال — يُعرض الجدول المخزّن');
+}
+
+document.getElementById('frow').addEventListener('click',e=>{
+  const b=e.target.closest('.chip');if(!b)return;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  b.classList.add('on');curFilter=b.dataset.f;render();
+});
+document.getElementById('refreshBtn').addEventListener('click',loadLive);
+
+render();        // اعرض الاحتياطي فوراً
+loadLive();      // ثم حدّث من المصدر الحي
+</script>
+</body>
+</html>
