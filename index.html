@@ -524,7 +524,7 @@ async function loadLive(){
         setStatus('live',`محدّث مباشرة · ${hh}:${mm}`);return;}
     }catch(e){}
   }
-  setStatus('err','تعذّر الاتصال');
+  setStatus('err','تعذّر الاتصال — يُعرض الجدول المخزّن');
 }
 
 document.getElementById('frow').addEventListener('click',e=>{
