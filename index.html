@@ -359,6 +359,41 @@ function canonKey(a,b){
   const c=x=>NAME[norm(x)]?NAME[norm(x)][0]:norm(x);
   return [c(a),c(b)].sort().join('|');
 }
+const GOALS_CACHE_KEY="wc26-goals-cache-v1";
+function matchCacheKey(m){
+  if(!m||!m.t1raw||!m.t2raw)return null;
+  return canonKey(m.t1raw,m.t2raw)+"@"+(m.epoch||m.day+"-"+m.time);
+}
+function readGoalsCache(){
+  try{return JSON.parse(localStorage.getItem(GOALS_CACHE_KEY)||"{}");}
+  catch(e){return {};}
+}
+function writeGoalsCache(cache){
+  try{localStorage.setItem(GOALS_CACHE_KEY,JSON.stringify(cache));}
+  catch(e){}
+}
+function applyGoalsCache(){
+  const cache=readGoalsCache();
+  DATA.forEach(m=>{
+    const key=matchCacheKey(m); if(!key||!cache[key])return;
+    const saved=cache[key];
+    if(saved.score&&!m.score)m.score=saved.score;
+    if(saved.finished)m.finished=true;
+    if(saved.goals&&saved.goals.length&&!(m.goals&&m.goals.length))m.goals=saved.goals;
+  });
+}
+function saveMatchGoals(m){
+  const key=matchCacheKey(m); if(!key||(!m.score&&!(m.goals&&m.goals.length)))return;
+  const cache=readGoalsCache();
+  const prev=cache[key]||{};
+  cache[key]={
+    score:m.score||prev.score||null,
+    finished:!!m.finished||!!prev.finished,
+    goals:(m.goals&&m.goals.length)?m.goals:(prev.goals||[]),
+    savedAt:Date.now()
+  };
+  writeGoalsCache(cache);
+}
 function mergeScores(j){
   if(!j||!j.scores)return;
   const idx={};
@@ -382,6 +417,7 @@ function mergeScores(j){
     })).sort((x,y)=>(x.min+x.plus/10)-(y.min+y.plus/10));
     // لا تمسح المسجّلين المعروضين برد ناقص: تجاهل القائمة الفاضية لو عندنا قائمة فيها محتوى
     if(ng.length || !(m.goals&&m.goals.length)) m.goals=ng;
+    saveMatchGoals(m);
   });
   render();
 }
@@ -399,6 +435,7 @@ async function loadScores(){
 
 const list=document.getElementById('list'),empty=document.getElementById('empty');
 let DATA=fromFallback(), curFilter='all';
+applyGoalsCache();
 const ST={groups:["g","المجموعة"],r32:["k","دور 32"],r16:["k",""],qf:["k","ربع"],sf:["k","نصف"],final:["f","النهائي"]};
 
 function teamRow(t,sc,win){
@@ -519,7 +556,7 @@ async function loadLive(){
     try{
       const r=await fetch(u,{cache:'no-store'}); if(!r.ok)continue;
       const j=await r.json(); const live=fromLive(j);
-      if(live.length){DATA=live;render();
+      if(live.length){DATA=live;applyGoalsCache();render();
         const now=new Date();const hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0');
         setStatus('live',`محدّث مباشرة · ${hh}:${mm}`);return;}
     }catch(e){}
