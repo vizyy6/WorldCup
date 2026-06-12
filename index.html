@@ -81,6 +81,13 @@
   .plabels .vb{color:#9fb0e6;font-weight:800;direction:ltr;display:flex;align-items:center;gap:5px}
   .plabels .pf{font-size:15px}
   .plabels .toq{font-size:9.5px;color:var(--mut)}
+  .goals{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+  .grow{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--txt)}
+  .grow.a{justify-content:flex-start;direction:ltr;text-align:left}
+  .gball{font-size:11px;flex:0 0 auto}
+  .gname{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gmin{color:var(--accent);font-weight:800;font-size:11.5px;direction:ltr;flex:0 0 auto}
+  .grow.a .gmin{color:#9fb0e6}
   .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--bg2);color:var(--mut);border:1px solid var(--line)}
   .tag.g{color:var(--accent)}.tag.k{color:var(--accent2);border-color:rgba(255,61,127,.3)}.tag.f{color:var(--gold);border-color:rgba(255,203,69,.4)}
   .leg{color:var(--mut);font-size:12.5px;margin:0 4px 16px;display:flex;align-items:center;gap:8px}
@@ -336,6 +343,44 @@ function fromLive(json){
 }
 
 /* ===== العرض ===== */
+/* ===== النتائج اللحظية (API-Football عبر Cloudflare Worker) ===== */
+const WORKER_URL="https://worldcup-scores.vizyy33.workers.dev"; // ← الصق رابط الووركر هنا بين علامتي التنصيص، مثل: https://worldcup-scores.xxxx.workers.dev
+function canonKey(a,b){
+  const c=x=>NAME[norm(x)]?NAME[norm(x)][0]:norm(x);
+  return [c(a),c(b)].sort().join('|');
+}
+function mergeScores(j){
+  if(!j||!j.scores)return;
+  const idx={};
+  j.scores.forEach(s=>{const k=canonKey(s.h,s.a);(idx[k]=idx[k]||[]).push(s);});
+  DATA.forEach(m=>{
+    if(!m.t1raw||!m.t2raw)return;
+    const cands=idx[canonKey(m.t1raw,m.t2raw)];
+    if(!cands)return;
+    let best=null,bd=Infinity;
+    cands.forEach(s=>{const d=Math.abs(s.ts*1000-(m.epoch||0));if(d<bd){bd=d;best=s;}});
+    if(!best||bd>48*3600*1000)return; // نفس المواجهة خلال يومين من موعدها فقط
+    const c=x=>NAME[norm(x)]?NAME[norm(x)][0]:norm(x);
+    const flip = c(best.h)!==c(m.t1raw);
+    if(best.ft) m.score = flip?[best.ft[1],best.ft[0]]:best.ft.slice();
+    m.liveNow = best.status==='LIVE';
+    m.finished = best.status==='FT';
+    m.elapsed = best.elapsed||null;
+    m.goals = (best.goals||[]).map(g=>({
+      side: flip ? (g.side==='h'?'a':'h') : g.side,
+      player:g.player, min:g.min, plus:g.plus, pen:g.pen, og:g.og
+    })).sort((x,y)=>(x.min+x.plus/10)-(y.min+y.plus/10));
+  });
+  render();
+}
+async function loadScores(){
+  if(!WORKER_URL)return;
+  try{
+    const r=await fetch(WORKER_URL,{cache:'no-store'});
+    if(r.ok) mergeScores(await r.json());
+  }catch(e){}
+}
+
 const list=document.getElementById('list'),empty=document.getElementById('empty');
 let DATA=fromFallback(), curFilter='all';
 const ST={groups:["g","المجموعة"],r32:["k","دور 32"],r16:["k",""],qf:["k","ربع"],sf:["k","نصف"],final:["f","النهائي"]};
@@ -350,7 +395,7 @@ function buildStandings(){
     const g=m.grp; groups[g]=groups[g]||{};
     const ens=(k,nm)=>{if(!groups[g][k])groups[g][k]={key:k,name:nm[0],flag:nm[1],p:0,gf:0,ga:0,pts:0};return groups[g][k];};
     const A=ens(m.t1raw,m.t1),B=ens(m.t2raw,m.t2);
-    if(m.score){const a=m.score[0],b=m.score[1];A.p++;B.p++;A.gf+=a;A.ga+=b;B.gf+=b;B.ga+=a;
+    if(m.score && !m.liveNow){const a=m.score[0],b=m.score[1];A.p++;B.p++;A.gf+=a;A.ga+=b;B.gf+=b;B.ga+=a;
       if(a>b)A.pts+=3;else if(b>a)B.pts+=3;else{A.pts++;B.pts++;}}
   });
   const out={};
@@ -408,20 +453,30 @@ function render(){
     }
     const el=document.createElement('div');el.className='match'+(isKsa?' ksaM':'');
     const stad=STAD[m.city]||'';
-    const status = sc ? 'finished' : ((m.epoch && Date.now()>=m.epoch) ? 'live' : 'upcoming');
+    const status = m.finished ? 'finished'
+      : m.liveNow ? 'live'
+      : sc ? 'finished'
+      : ((m.epoch && Date.now()>=m.epoch) ? 'live' : 'upcoming');
     let metaTop;
     if(status==='finished') metaTop=`<div class="ft">انتهت</div>`;
-    else if(status==='live') metaTop=`<div class="livep">● مباشر الآن</div>`;
+    else if(status==='live') metaTop=`<div class="livep">● مباشر${m.elapsed?` ${m.elapsed}'`:' الآن'}</div>`;
     else metaTop=`<div><span class="time">${m.time}</span> <span class="ampm">${m.ap}</span></div><div class="ns">● لم تبدأ</div>`;
     let probHtml='';
     if(status==='upcoming' && m.t1 && m.t1raw && m.t2raw){
       const wp=winProb(m.t1raw,m.t2raw);
       if(wp) probHtml=`<div class="prob"><div class="pbar"><span class="pa" style="width:${wp[0]}%"></span><span class="pb" style="width:${wp[1]}%"></span></div><div class="plabels"><span class="va"><span class="pf">${m.t1[1]}</span>${wp[0]}%</span><span class="toq">توقع الفوز حسب ترتيب الفيفا</span><span class="vb">${wp[1]}%<span class="pf">${m.t2[1]}</span></span></div></div>`;
     }
+    let goalsHtml='';
+    if(m.goals && m.goals.length){
+      const row=g=>`<div class="grow ${g.side}"><span class="gball">⚽</span><span class="gname">${g.player}${g.pen?' (ج)':''}${g.og?' (خطأ)':''}</span><span class="gmin">${g.min}${g.plus?`+${g.plus}`:''}'</span></div>`;
+      goalsHtml=`<div class="goals"><div class="gcol">${m.goals.filter(g=>g.side==='h').map(row).join('')}</div><div class="gcol">${m.goals.filter(g=>g.side==='a').map(row).join('')}</div></div>`;
+    }
     el.innerHTML=`<div class="teams">${teamsHtml}</div>
       <div class="meta">${metaTop}
       ${stad?`<div class="stad">${stad}</div>`:''}
-      <div class="city">${m.city}</div><div class="tag ${st[0]}">${label}</div></div>
+      <div class="city">${m.city}</div>
+      <div class="tag ${st[0]}">${label}</div></div>
+      ${goalsHtml}
       ${probHtml}`;
     dg.appendChild(el);
   });
@@ -445,7 +500,7 @@ async function loadLive(){
         setStatus('live',`محدّث مباشرة · ${hh}:${mm}`);return;}
     }catch(e){}
   }
-  setStatus('err','تعذّر الاتصال — يُعرض الجدول المخزّن');
+  setStatus('err','تعذّر الاتصال');
 }
 
 document.getElementById('frow').addEventListener('click',e=>{
@@ -453,10 +508,20 @@ document.getElementById('frow').addEventListener('click',e=>{
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
   b.classList.add('on');curFilter=b.dataset.f;render();
 });
-document.getElementById('refreshBtn').addEventListener('click',loadLive);
+document.getElementById('refreshBtn').addEventListener('click',()=>loadLive().then(loadScores));
 
 render();        // اعرض الاحتياطي فوراً
-loadLive();      // ثم حدّث من المصدر الحي
+loadLive().then(loadScores);   // ثم حدّث من المصدر + النتائج اللحظية
+
+// استطلاع تكيفي: كل ٢٠ ثانية وقت مباراة مباشرة، كل ٣ دقائق خارجها
+function anyLiveNow(){
+  return DATA.some(m => m.liveNow || (!m.finished && !m.score && m.epoch && Date.now()>=m.epoch && Date.now() < m.epoch + 3*3600*1000));
+}
+function pollLoop(){
+  const wait = anyLiveNow() ? 20*1000 : 3*60*1000;
+  setTimeout(async ()=>{ await loadScores(); pollLoop(); }, wait);
+}
+pollLoop();
 </script>
 </body>
 </html>
