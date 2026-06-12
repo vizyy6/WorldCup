@@ -394,6 +394,22 @@ function saveMatchGoals(m){
   };
   writeGoalsCache(cache);
 }
+function preserveMatchState(prevData){
+  const idx={};
+  (prevData||[]).forEach(p=>{
+    const key=matchCacheKey(p);
+    if(key)idx[key]=p;
+  });
+  DATA.forEach(m=>{
+    const old=idx[matchCacheKey(m)];
+    if(!old)return;
+    if(old.score&&!m.score)m.score=old.score;
+    if(old.finished)m.finished=true;
+    if(old.liveNow)m.liveNow=true;
+    if(old.elapsed&&!m.elapsed)m.elapsed=old.elapsed;
+    if(old.goals&&old.goals.length&&!(m.goals&&m.goals.length))m.goals=old.goals;
+  });
+}
 function mergeScores(j){
   if(!j||!j.scores)return;
   const idx={};
@@ -556,7 +572,7 @@ async function loadLive(){
     try{
       const r=await fetch(u,{cache:'no-store'}); if(!r.ok)continue;
       const j=await r.json(); const live=fromLive(j);
-      if(live.length){DATA=live;applyGoalsCache();render();
+      if(live.length){const prevData=DATA;DATA=live;preserveMatchState(prevData);applyGoalsCache();render();
         const now=new Date();const hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0');
         setStatus('live',`محدّث مباشرة · ${hh}:${mm}`);return;}
     }catch(e){}
