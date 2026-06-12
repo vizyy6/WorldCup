@@ -75,7 +75,6 @@
   .time{font-family:'Bebas Neue';font-size:30px;color:var(--txt);line-height:.9;letter-spacing:1px}
   .ampm{font-size:13px;color:var(--accent);font-family:'Tajawal';font-weight:700}
   .ft{font-size:11px;font-weight:800;color:var(--accent2);background:rgba(255,61,127,.12);border:1px solid rgba(255,61,127,.3);padding:2px 8px;border-radius:6px}
-  .scoreline{font-family:'Bebas Neue';font-size:28px;color:var(--gold);direction:ltr;line-height:.9;letter-spacing:1px}
   .stad{color:var(--txt);font-size:12.5px;font-weight:700;direction:rtl;text-align:left;line-height:1.25}
   .city{color:var(--mut);font-size:12px;direction:rtl;text-align:left}
   .livep{font-size:11px;font-weight:800;color:#1fe3aa;background:rgba(0,224,164,.14);border:1px solid rgba(0,224,164,.45);padding:2px 9px;border-radius:6px}
@@ -355,7 +354,7 @@ function fromLive(json){
 
 /* ===== العرض ===== */
 /* ===== النتائج اللحظية (API-Football عبر Cloudflare Worker) ===== */
-const WORKER_URL="https://worldcup-scores.vizyy33.workers.dev"; // ← الصق رابط الووركر هنا بين علامتي التنصيص، مثل: https://worldcup-scores.xxxx.workers.dev
+const WORKER_URL="https://worldcup-scores.vizyy33.workers.dev"; // رابط الووركر الخاص بك
 function canonKey(a,b){
   const c=x=>NAME[norm(x)]?NAME[norm(x)][0]:norm(x);
   return [c(a),c(b)].sort().join('|');
@@ -377,10 +376,12 @@ function mergeScores(j){
     m.liveNow = best.status==='LIVE';
     m.finished = best.status==='FT';
     m.elapsed = best.elapsed||null;
-    m.goals = (best.goals||[]).map(g=>({
+    const ng=(best.goals||[]).map(g=>({
       side: flip ? (g.side==='h'?'a':'h') : g.side,
       player:g.player, min:g.min, plus:g.plus, pen:g.pen, og:g.og
     })).sort((x,y)=>(x.min+x.plus/10)-(y.min+y.plus/10));
+    // لا تمسح المسجّلين المعروضين برد ناقص: تجاهل القائمة الفاضية لو عندنا قائمة فيها محتوى
+    if(ng.length || !(m.goals&&m.goals.length)) m.goals=ng;
   });
   render();
 }
@@ -388,7 +389,11 @@ async function loadScores(){
   if(!WORKER_URL)return;
   try{
     const r=await fetch(WORKER_URL,{cache:'no-store'});
-    if(r.ok) mergeScores(await r.json());
+    if(r.ok){
+      mergeScores(await r.json());
+      const n=new Date(),hh=String(n.getHours()).padStart(2,'0'),mm=String(n.getMinutes()).padStart(2,'0');
+      setStatus('live',`محدّث مباشرة · ${hh}:${mm}`);
+    }
   }catch(e){}
 }
 
