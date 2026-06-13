@@ -630,22 +630,33 @@ function render(){
     const st=ST[m.stage]||["k",""];
     const label=m.stage==='groups'?`${st[1]} ${m.grp}`:(m.grp||'النهائي');
     const sc=m.score;
+    const isKsaM=isKsa;
+    const statusEarly = m.finished ? 'finished'
+      : m.liveNow ? 'live'
+      : sc && !shouldBeLive(m) ? 'finished'
+      : shouldBeLive(m) ? 'live'
+      : 'upcoming';
+    // نتيجة العرض: لو مباشرة وما فيه نتيجة بعد، اعرض 0-0
+    const dsc = sc || (statusEarly==='live' ? [0,0] : null);
     let teamsHtml;
     if(m.t1){
-      teamsHtml=teamRow(m.t1,sc?sc[0]:null,sc&&sc[0]>sc[1])+`<div class="vs">×</div>`+teamRow(m.t2,sc?sc[1]:null,sc&&sc[1]>sc[0]);
+      teamsHtml=teamRow(m.t1,dsc?dsc[0]:null,dsc&&statusEarly==='finished'&&dsc[0]>dsc[1])+`<div class="vs">×</div>`+teamRow(m.t2,dsc?dsc[1]:null,dsc&&statusEarly==='finished'&&dsc[1]>dsc[0]);
     }else{
       const parts=m.t2[0].split(' × ');
       teamsHtml=`<div class="team" style="font-size:15px">${parts[0]}</div><div class="vs">×</div><div class="team" style="font-size:15px">${parts[1]||''}</div>`;
     }
     const el=document.createElement('div');el.className='match'+(isKsa?' ksaM':'');
     const stad=STAD[m.city]||'';
-    const status = m.finished ? 'finished'
-      : m.liveNow ? 'live'
-      : sc ? 'finished'
-      : ((m.epoch && Date.now()>=m.epoch) ? 'live' : 'upcoming');
+    const status = statusEarly;
+    // دقيقة تقديرية محلية لو الووركر ما أعطى الدقيقة بعد (تقريبية، تُصحّح أول ما يرد الووركر)
+    let liveMin = m.elapsed;
+    if(status==='live' && !liveMin && m.epoch){
+      const mins = Math.floor((Date.now()-m.epoch)/60000);
+      liveMin = mins<=45 ? Math.max(1,mins) : (mins<60 ? 45 : Math.min(90, mins-15)); // تقدير تقريبي مع استراحة
+    }
     let metaTop;
     if(status==='finished') metaTop=`<div class="ft">انتهت</div>`;
-    else if(status==='live') metaTop=`<div class="livep">● مباشر${m.elapsed?` ${m.elapsed}'`:' الآن'}</div>`;
+    else if(status==='live') metaTop=`<div class="livep">● مباشر${liveMin?` ${liveMin}'`:''}</div>`;
     else metaTop=`<div><span class="time">${m.time}</span> <span class="ampm">${m.ap}</span></div><div class="ns">● لم تبدأ</div>`;
     let probHtml='';
     if(status==='upcoming' && m.t1 && m.t1raw && m.t2raw){
@@ -708,12 +719,16 @@ render();        // اعرض الاحتياطي فوراً
 loadLive().then(loadScores);   // ثم حدّث من المصدر + النتائج اللحظية
 
 // استطلاع تكيفي: كل ٢٠ ثانية وقت مباراة مباشرة، كل ٣ دقائق خارجها
+function shouldBeLive(m){
+  // المباراة يفترض أنها جارية لو مرّ موعد انطلاقها بأقل من ساعتين ونصف ولم تُحسم بعد
+  return m.epoch && Date.now()>=m.epoch && Date.now() < m.epoch + 150*60*1000 && !m.finished;
+}
 function anyLiveNow(){
-  return DATA.some(m => m.liveNow || (!m.finished && !m.score && m.epoch && Date.now()>=m.epoch && Date.now() < m.epoch + 3*3600*1000));
+  return DATA.some(m => m.liveNow || shouldBeLive(m));
 }
 function pollLoop(){
   const wait = anyLiveNow() ? 10*1000 : 3*60*1000;
-  setTimeout(async ()=>{ await loadScores(); pollLoop(); }, wait);
+  setTimeout(async ()=>{ await loadScores(); render(); pollLoop(); }, wait);
 }
 pollLoop();
 
