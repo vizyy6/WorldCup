@@ -712,7 +712,7 @@ function anyLiveNow(){
   return DATA.some(m => m.liveNow || (!m.finished && !m.score && m.epoch && Date.now()>=m.epoch && Date.now() < m.epoch + 3*3600*1000));
 }
 function pollLoop(){
-  const wait = anyLiveNow() ? 20*1000 : 3*60*1000;
+  const wait = anyLiveNow() ? 10*1000 : 3*60*1000;
   setTimeout(async ()=>{ await loadScores(); pollLoop(); }, wait);
 }
 pollLoop();
