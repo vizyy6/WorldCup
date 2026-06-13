@@ -9,6 +9,11 @@
 <meta property="og:description" content="كل مباريات المونديال بتوقيت السعودية، مع النتائج المباشرة والأدوار الإقصائية.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0a0e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="كأس العالم 2026">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -120,6 +125,22 @@
   .note{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 20px;color:var(--mut);font-size:13.5px}
   .note b{color:var(--txt)}
   .empty{text-align:center;color:var(--mut);padding:40px 0}
+  .tsub{font-size:11px;color:var(--mut);font-weight:500;margin-top:1px}
+  .bracket{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin}
+  .bcol{flex:0 0 230px;display:flex;flex-direction:column;gap:10px}
+  .bhd{font-weight:800;color:var(--accent);font-size:14px;padding:6px 2px;border-bottom:1px solid var(--line)}
+  .bm{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+  .bm.bksa{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+  .bnum{font-size:10px;color:var(--mut);font-weight:700;margin-bottom:5px;direction:rtl}
+  .bteam{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;padding:3px 0}
+  .bteam.bwin{color:var(--gold)}
+  .bteam.bph{color:var(--mut);font-size:12px;font-weight:600}
+  .bflag{font-size:16px;width:20px;text-align:center;flex:0 0 auto}
+  .bname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bsc{margin-right:auto;font-family:'Bebas Neue';font-size:18px;direction:ltr;color:var(--accent)}
+  .bteam.bwin .bsc{color:var(--gold)}
+  .bmeta{font-size:10.5px;color:var(--mut);margin-top:5px;padding-top:5px;border-top:1px dashed var(--line);direction:rtl}
+  .bft{color:var(--accent2);font-weight:800}.blive{color:#1fe3aa;font-weight:800}
   footer{text-align:center;color:var(--mut);font-size:12px;margin-top:30px;padding:0 14px}
 </style>
 </head>
@@ -143,6 +164,8 @@
     <button class="chip on" data-f="all">الكل</button>
     <button class="chip ksaC" data-f="ksa">🇸🇦 السعودية</button>
     <button class="chip" data-f="groups">المجموعات</button>
+    <button class="chip" data-f="scorers">⚽ الهدافون</button>
+    <button class="chip" data-f="bracket">🏆 الشجرة</button>
     <button class="chip" data-f="r32">دور الـ32</button>
     <button class="chip" data-f="r16">دور الـ16</button>
     <button class="chip" data-f="qf">ربع النهائي</button>
@@ -332,7 +355,7 @@ const FB=[
 ["19 يوليو","الأحد",null,"فائز 101 × فائز 102","نيويورك/نيوجيرسي","10:00","م","final","النهائي"]
 ];
 function fromFallback(){
-  return FB.map((m,i)=>({order:i,epoch:null,day:m[0],dow:m[1],
+  return FB.map((m,i)=>({order:i,epoch:null,num:(m[8]&&m[8][0]==='#')?+m[8].slice(1):null,day:m[0],dow:m[1],
     t1:m[2]?arName(m[2]):null, t2:m[2]?arName(m[3]):[m[3],""], t1raw:m[2], t2raw:m[2]?m[3]:null,
     city:m[4],time:m[5],ap:m[6],stage:m[7],grp:m[8],score:null}));
 }
@@ -345,7 +368,7 @@ function fromLive(json){
     let t1,t2,t1raw,t2raw;
     if(c1&&c2){ t1=arName(m.team1); t2=arName(m.team2); t1raw=norm(m.team1); t2raw=norm(m.team2); }
     else { t1=null; t2=[decode(m.team1)+" × "+decode(m.team2),""]; t1raw=null; t2raw=null; }
-    out.push({order:k.ms,epoch:k.epoch,day:k.day,dow:k.dow,time:k.time,ap:k.ap,city:arCity(m.ground),
+    out.push({order:k.ms,epoch:k.epoch,num:m.num||null,day:k.day,dow:k.dow,time:k.time,ap:k.ap,city:arCity(m.ground),
       stage, grp, t1, t2, t1raw, t2raw, score:scoreOf(m)});
   });
   out.sort((a,b)=>a.order-b.order);
@@ -363,6 +386,42 @@ const GOALS_CACHE_KEY="wc26-goals-cache-v1";
 function matchCacheKey(m){
   if(!m||!m.t1raw||!m.t2raw)return null;
   return canonKey(m.t1raw,m.t2raw)+"@"+(m.epoch||m.day+"-"+m.time);
+}
+/* ===== نتائج مطبوعة دائمة (اختياري) =====
+   عبّيها يدوياً لما تخلص أي مباراة، فتظهر للجميع فوراً وللأبد —
+   حتى لو الووركر طاح أو انمسح كاشه. المفتاح: "بلد1|بلد2" بالإنجليزي المُطبّع.
+   الترتيب لا يهم (الكود يطابق تلقائياً). مثال معبّأ ثم احذفه/استبدله:
+*/
+const RESULTS={
+  // "mexico|south africa":{ft:[2,0],goals:[
+  //   {side:"h",player:"Julián Quiñones",min:9},
+  //   {side:"h",player:"Raúl Jiménez",min:67}
+  // ]},
+};
+function applyPrintedResults(){
+  // مفتاح إنجليزي مُطبّع غير مرتب: "mexico|south africa" — كما يكتبه المستخدم
+  const enKey=(a,b)=>[norm(a),norm(b)].sort().join('|');
+  const index={};
+  Object.keys(RESULTS).forEach(k=>{
+    const [x,y]=k.split('|');
+    index[enKey(x,y)]={r:RESULTS[k],first:norm(x)};
+  });
+  DATA.forEach(m=>{
+    if(!m.t1raw||!m.t2raw)return;
+    const hit=index[enKey(m.t1raw,m.t2raw)];
+    if(!hit)return;
+    const r=hit.r;
+    // اتجاه النتيجة: إذا أول اسم بالمفتاح ليس هو الفريق الأول في المباراة، اقلب
+    const flip = hit.first!==norm(m.t1raw);
+    if(r.ft && !m.score) m.score = flip?[r.ft[1],r.ft[0]]:r.ft.slice();
+    if(r.ft) m.finished=true;
+    if(r.goals && r.goals.length && !(m.goals&&m.goals.length)){
+      m.goals=r.goals.map(g=>({
+        side: flip?(g.side==='h'?'a':'h'):g.side,
+        player:g.player, min:g.min||0, plus:g.plus||0, pen:!!g.pen, og:!!g.og
+      })).sort((x,y)=>(x.min+x.plus/10)-(y.min+y.plus/10));
+    }
+  });
 }
 function readGoalsCache(){
   try{return JSON.parse(localStorage.getItem(GOALS_CACHE_KEY)||"{}");}
@@ -435,14 +494,18 @@ function mergeScores(j){
     if(ng.length || !(m.goals&&m.goals.length)) m.goals=ng;
     saveMatchGoals(m);
   });
+  applyPrintedResults();
   render();
 }
+let TOPS=[];
 async function loadScores(){
   if(!WORKER_URL)return;
   try{
     const r=await fetch(WORKER_URL,{cache:'no-store'});
     if(r.ok){
-      mergeScores(await r.json());
+      const j=await r.json();
+      if(j.topscorers&&j.topscorers.length)TOPS=j.topscorers;
+      mergeScores(j);
       const n=new Date(),hh=String(n.getHours()).padStart(2,'0'),mm=String(n.getMinutes()).padStart(2,'0');
       setStatus('live',`محدّث مباشرة · ${hh}:${mm}`);
     }
@@ -451,6 +514,7 @@ async function loadScores(){
 
 const list=document.getElementById('list'),empty=document.getElementById('empty');
 let DATA=fromFallback(), curFilter='all';
+applyPrintedResults();
 applyGoalsCache();
 const ST={groups:["g","المجموعة"],r32:["k","دور 32"],r16:["k",""],qf:["k","ربع"],sf:["k","نصف"],final:["f","النهائي"]};
 
@@ -491,9 +555,62 @@ function renderStandings(){
   });
   list.appendChild(grid);
 }
+function renderScorers(){
+  if(!TOPS.length){
+    const d=document.createElement('div');d.className='empty';
+    d.textContent='قائمة الهدافين بتظهر هنا أول ما تنحسب الأهداف — ارجع بعد المباريات الأولى.';
+    list.appendChild(d);return;
+  }
+  const card=document.createElement('div');card.className='grpcard';
+  let rows='';
+  TOPS.forEach((p,i)=>{
+    const nm=NAME[norm(p.team)],flag=nm?nm[1]:'\ud83c\udff3\ufe0f',tname=nm?nm[0]:p.team;
+    const ksa=norm(p.team)==='saudi arabia';
+    rows+=`<tr class="${i===0?'adv':''} ${ksa?'ksaRow':''}"><td class="rk">${i+1}</td>
+      <td class="tm"><span class="flag">${flag}</span><span>${p.name}<div class="tsub">${tname}</div></span></td>
+      <td>${p.assists||0}</td><td class="pts">${p.goals}</td></tr>`;
+  });
+  card.innerHTML=`<div class="grphd">\u26bd هدافو البطولة</div>
+    <table class="grptbl"><thead><tr><th></th><th>اللاعب</th><th>صناعة</th><th>أهداف</th></tr></thead><tbody>${rows}</tbody></table>`;
+  list.appendChild(card);
+}
+function renderBracket(){
+  const ROUNDS=[['r32','دور الـ32'],['r16','دور الـ16'],['qf','ربع النهائي'],['sf','نصف النهائي'],['final','النهائي']];
+  const br=document.createElement('div');br.className='bracket';
+  ROUNDS.forEach(([key,title])=>{
+    const ms=DATA.filter(m=>m.stage===key).sort((a,b)=>(a.num||9999)-(b.num||9999)||a.order-b.order);
+    if(!ms.length)return;
+    const col=document.createElement('div');col.className='bcol';
+    let html=`<div class="bhd">${title}</div>`;
+    ms.forEach(m=>{
+      const sc=m.score;
+      const line=(t,s,win)=>`<div class="bteam ${win?'bwin':''}"><span class="bflag">${t[1]||''}</span><span class="bname">${t[0]}</span>${s!=null?`<span class="bsc">${s}</span>`:''}</div>`;
+      let inner;
+      if(m.t1){
+        inner=line(m.t1,sc?sc[0]:null,sc&&m.finished&&sc[0]>sc[1])+line(m.t2,sc?sc[1]:null,sc&&m.finished&&sc[1]>sc[0]);
+      }else{
+        const parts=m.t2[0].split(' \u00d7 ');
+        inner=`<div class="bteam bph">${parts[0]}</div><div class="bteam bph">${parts[1]||''}</div>`;
+      }
+      const status = (m.finished||(sc&&!m.liveNow)) ? `<span class="bft">انتهت</span>`
+        : m.liveNow ? `<span class="blive">\u25cf مباشر</span>`
+        : `${m.day} \u00b7 ${m.time} ${m.ap}`;
+      html+=`<div class="bm ${(m.t1raw==='saudi arabia'||m.t2raw==='saudi arabia')?'bksa':''}">
+        ${m.num?`<div class="bnum">#${m.num}${m.grp==='م. الثالث'?' \u00b7 م. الثالث':''}</div>`:(m.grp==='م. الثالث'?`<div class="bnum">م. الثالث</div>`:'')}
+        ${inner}<div class="bmeta">${status}</div></div>`;
+    });
+    col.innerHTML=html;br.appendChild(col);
+  });
+  list.appendChild(br);
+  const hint=document.createElement('div');hint.className='leg';
+  hint.innerHTML='<span class="dotg"></span> اسحب يميناً ويساراً لاستعراض الأدوار — الفرق تتعبّى تلقائياً مع تقدم البطولة.';
+  list.appendChild(hint);
+}
 function render(){
   list.innerHTML='';
   if(curFilter==='groups'){renderStandings();return;}
+  if(curFilter==='scorers'){empty.style.display='none';renderScorers();return;}
+  if(curFilter==='bracket'){empty.style.display='none';renderBracket();return;}
   const rows=DATA.filter(m=>{
     if(curFilter==='all')return true;
     if(curFilter==='ksa')return m.t1raw==='saudi arabia'||m.t2raw==='saudi arabia';
@@ -572,7 +689,7 @@ async function loadLive(){
     try{
       const r=await fetch(u,{cache:'no-store'}); if(!r.ok)continue;
       const j=await r.json(); const live=fromLive(j);
-      if(live.length){const prevData=DATA;DATA=live;preserveMatchState(prevData);applyGoalsCache();render();
+      if(live.length){const prevData=DATA;DATA=live;preserveMatchState(prevData);applyPrintedResults();applyGoalsCache();render();
         const now=new Date();const hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0');
         setStatus('live',`محدّث مباشرة · ${hh}:${mm}`);return;}
     }catch(e){}
@@ -599,6 +716,10 @@ function pollLoop(){
   setTimeout(async ()=>{ await loadScores(); pollLoop(); }, wait);
 }
 pollLoop();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
 </script>
 </body>
 </html>
