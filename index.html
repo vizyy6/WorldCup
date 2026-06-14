@@ -23,7 +23,6 @@
     --bg:#0a0e1a;--bg2:#0f1628;--card:#141d33;--card-hi:#1b2742;--line:#23304f;
     --txt:#eaf0ff;--mut:#8593b3;--accent:#00e0a4;--accent2:#ff3d7f;--gold:#ffcb45;
   }
-  *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Tajawal',sans-serif;line-height:1.5;padding-bottom:60px;-webkit-tap-highlight-color:transparent;
     background:radial-gradient(1200px 600px at 80% -10%,rgba(0,224,164,.10),transparent 60%),
       radial-gradient(1000px 500px at 0% 0%,rgba(255,61,127,.08),transparent 55%),var(--bg);color:var(--txt)}
@@ -124,6 +123,11 @@
   .grptbl .flag{font-size:18px;width:22px;text-align:center;line-height:1}
   .note{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 20px;color:var(--mut);font-size:13.5px}
   .note b{color:var(--txt)}
+  .hidefin{display:inline-block;margin:0 0 16px;padding:7px 14px;border-radius:20px;cursor:pointer;
+    font-family:'Tajawal';font-weight:700;font-size:12.5px;transition:.2s;
+    background:linear-gradient(120deg,var(--accent),#00b389);color:#04221a;border:1px solid transparent}
+  .hidefin.off{background:transparent;color:var(--mut);border:1px solid var(--line)}
+  .hidefin.off:hover{color:var(--txt)}
   .empty{text-align:center;color:var(--mut);padding:40px 0}
   .tsub{font-size:11px;color:var(--mut);font-weight:500;margin-top:1px}
   .bracket{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin}
@@ -178,6 +182,7 @@
   <div class="note">
     التوقيت بتوقيت السعودية (الرياض)، ومباريات المنتخب السعودي 🇸🇦 مميّزة بالذهبي.
   </div>
+  <button id="hideFinBtn" class="hidefin" onclick="toggleHideFinished()">اضغط لإخفاء المباريات المنتهية</button>
   <div id="list"></div>
   <div class="empty" id="empty" style="display:none">ما فيه مباريات في هذا التصنيف.</div>
 </div>
@@ -465,7 +470,7 @@ function preserveMatchState(prevData){
     if(old.score&&!m.score)m.score=old.score;
     if(old.finished)m.finished=true;
     if(old.liveNow)m.liveNow=true;
-    if(old.elapsed&&!m.elapsed)m.elapsed=old.elapsed;
+    // ملاحظة: لا نحتفظ بالدقيقة القديمة (elapsed) — تُجلب طازجة من الووركر فقط حتى لا تتجمّد
     if(old.goals&&old.goals.length&&!(m.goals&&m.goals.length))m.goals=old.goals;
   });
 }
@@ -513,7 +518,7 @@ async function loadScores(){
 }
 
 const list=document.getElementById('list'),empty=document.getElementById('empty');
-let DATA=fromFallback(), curFilter='all';
+let DATA=fromFallback(), curFilter='all', hideFinished=false;
 applyPrintedResults();
 applyGoalsCache();
 const ST={groups:["g","المجموعة"],r32:["k","دور 32"],r16:["k",""],qf:["k","ربع"],sf:["k","نصف"],final:["f","النهائي"]};
@@ -606,12 +611,27 @@ function renderBracket(){
   hint.innerHTML='<span class="dotg"></span> اسحب يميناً ويساراً لاستعراض الأدوار — الفرق تتعبّى تلقائياً مع تقدم البطولة.';
   list.appendChild(hint);
 }
+function toggleHideFinished(){
+  hideFinished=!hideFinished;
+  const b=document.getElementById('hideFinBtn');
+  if(b){
+    b.className='hidefin'+(hideFinished?' off':'');
+    b.textContent=hideFinished?'اضغط لإظهار المباريات المنتهية':'اضغط لإخفاء المباريات المنتهية';
+  }
+  render();
+}
 function render(){
   list.innerHTML='';
+  const hb=document.getElementById('hideFinBtn');
+  if(hb)hb.style.display=(curFilter==='groups'||curFilter==='scorers'||curFilter==='bracket')?'none':'inline-block';
   if(curFilter==='groups'){renderStandings();return;}
   if(curFilter==='scorers'){empty.style.display='none';renderScorers();return;}
   if(curFilter==='bracket'){empty.style.display='none';renderBracket();return;}
   const rows=DATA.filter(m=>{
+    if(hideFinished){
+      const isFin = m.finished || (m.score && !m.liveNow && !shouldBeLive(m));
+      if(isFin)return false;
+    }
     if(curFilter==='all')return true;
     if(curFilter==='ksa')return m.t1raw==='saudi arabia'||m.t2raw==='saudi arabia';
     return m.stage===curFilter;
@@ -648,12 +668,8 @@ function render(){
     const el=document.createElement('div');el.className='match'+(isKsa?' ksaM':'');
     const stad=STAD[m.city]||'';
     const status = statusEarly;
-    // دقيقة تقديرية محلية لو الووركر ما أعطى الدقيقة بعد (تقريبية، تُصحّح أول ما يرد الووركر)
-    let liveMin = m.elapsed;
-    if(status==='live' && !liveMin && m.epoch){
-      const mins = Math.floor((Date.now()-m.epoch)/60000);
-      liveMin = mins<=45 ? Math.max(1,mins) : (mins<60 ? 45 : Math.min(90, mins-15)); // تقدير تقريبي مع استراحة
-    }
+    // الدقيقة من API-Football مباشرة (m.elapsed) — لا تقدير محلي حتى لا تنحرف عن الواقع
+    const liveMin = m.elapsed;
     let metaTop;
     if(status==='finished') metaTop=`<div class="ft">انتهت</div>`;
     else if(status==='live') metaTop=`<div class="livep">● مباشر${liveMin?` ${liveMin}'`:''}</div>`;
