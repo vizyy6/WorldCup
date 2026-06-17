@@ -176,7 +176,7 @@
   <div class="kick">FIFA WORLD CUP</div>
   <h1>2026</h1>
   <div class="sub">الجدول الكامل · <b>بتوقيت الرياض</b></div>
-  <div class="sub" style="margin-top:4px">١١ يونيو — ١٩ يوليو · ٤٨ منتخب · ١٠٤ مباراة</div>
+  <div class="sub" style="margin-top:4px">١١ يونيو — ١٩ يوليو · ٤٨ منتخب · ١٠كار مباراة</div>
   <div class="by">by <span>Nawaf Almutairi</span></div>
   <div class="host">🇲🇽 🇺🇸 🇨🇦</div>
   <div class="status">
@@ -217,7 +217,7 @@ const NAME={
  "mexico":["المكسيك","🇲🇽"],"south africa":["جنوب أفريقيا","🇿🇦"],"south korea":["كوريا الجنوبية","🇰🇷"],"korea republic":["كوريا الجنوبية","🇰🇷"],
  "czechia":["التشيك","🇨🇿"],"czech republic":["التشيك","🇨🇿"],"canada":["كندا","🇨🇦"],"bosnia and herzegovina":["البوسنة والهرسك","🇧🇦"],"bosnia & herzegovina":["البوسنة والهرسك","🇧🇦"],
  "united states":["الولايات المتحدة","🇺🇸"],"usa":["الولايات المتحدة","🇺🇸"],"paraguay":["باراغواي","🇵🇾"],"qatar":["قطر","🇶🇦"],
- "switzerland":["سويسرا","🇨🇭"],"brazil":["البرازيل","🇧🇷"],"morocco":["المغرب","🇲🇦"],"haiti":["هايتي","🇹"],"scotland":["اسكتلندا","🏴󠁧󠁢󠁳󠁣󠁴󠁿"],
+ "switzerland":["سويسرا","🇨🇭"],"brazil":["البرازيل","🇧🇷"],"morocco":["المغرب","🇲🇦"],"haiti":["هايتي","🇭🇹"],"scotland":["اسكتلندا","🏴󠁧󠁢󠁳󠁣󠁴󠁿"],
  "australia":["أستراليا","🇦🇺"],"turkey":["تركيا","🇹🇷"],"türkiye":["تركيا","🇹🇷"],"turkiye":["تركيا","🇹🇷"],"germany":["ألمانيا","🇩🇪"],
  "curacao":["كوراساو","🇨🇼"],"curaçao":["كوراساو","🇨🇼"],"netherlands":["هولندا","🇳🇱"],"japan":["اليابان","🇯🇵"],
  "ivory coast":["ساحل العاج","🇨🇮"],"cote d'ivoire":["ساحل العاج","🇨🇮"],"côte d'ivoire":["ساحل العاج","🇨🇮"],"ecuador":["الإكوادور","🇪🇨"],
@@ -339,7 +339,7 @@ const FB=[
 ["20 يونيو","السبت","netherlands","sweden","هيوستن","08:00","م","groups","F"],["20 يونيو","السبت","germany","ivory coast","تورونتو","11:00","م","groups","E"],
 ["21 يونيو","الأحد","ecuador","curacao","كانساس سيتي","03:00","ص","groups","E"],["21 يونيو","الأحد","tunisia","japan","مونتيري","07:00","ص","groups","F"],
 ["21 يونيو","الأحد","spain","saudi arabia","أتلانتا","07:00","م","groups","H"],["21 يونيو","الأحد","belgium","iran","لوس أنجلوس","10:00","م","groups","G"],
-["22 يونيو","الإثنين","uruguay","cape verde","ميامي","01:00","ص","groups","H"],["22 يونيو","الإثنين","new zealand","egypt","فانروفر","04:00","ص","groups","G"],
+["22 يونيو","الإثنين","uruguay","cape verde","ميامي","01:00","ص","groups","H"],["22 يونيو","الإثنين","new zealand","egypt","فانكوفر","04:00","ص","groups","G"],
 ["22 يونيو","الإثنين","argentina","austria","دالاس","08:00","م","groups","J"],["23 يونيو","الثلاثاء","france","iraq","فيلادلفيا","12:00","ص","groups","I"],
 ["23 يونيو","الثلاثاء","norway","senegal","نيويورك/نيوجيرسي","03:00","ص","groups","I"],["23 يونيو","الثلاثاء","jordan","algeria","سان فرانسيسكو","06:00","ص","groups","J"],
 ["23 يونيو","الثلاثاء","portugal","uzbekistan","هيوستن","08:00","م","groups","K"],["23 يونيو","الثلاثاء","england","ghana","بوسطن","11:00","م","groups","L"],
@@ -424,7 +424,7 @@ function applyPrintedResults(){
       m.goals=r.goals.map(g=>({
         side: flip?(g.side==='h'?'a':'h'):g.side,
         player:g.player, min:g.min||0, plus:g.plus||0, pen:!!g.pen, og:!!g.og
-      })).sort((x,y)=>(x.min+x.plus/10)-(y.min+x.plus/10));
+      })).sort((x,y)=>(x.min+x.plus/10)-(y.min+y.plus/10));
     }
   });
 }
@@ -626,7 +626,7 @@ function renderBracket(){
     if(m.t1){
       inner=line(m.t1,sc?sc[0]:null,sc&&m.finished&&sc[0]>sc[1])+line(m.t2,sc?sc[1]:null,sc&&m.finished&&sc[1]>sc[0]);
     }else{
-      const parts=m.t2[0].split(' \u00d7 ');
+      const parts=m.t2[0].split(' × ');
       inner=`<div class="bteam bph">${parts[0]}</div><div class="bteam bph">${parts[1]||''}</div>`;
     }
     const status = (m.finished||(sc&&!m.liveNow)) ? `<span class="bft">انتهت</span>`
@@ -736,7 +736,6 @@ function render(){
       goalsHtml=`<div class="goals">${col('h',m.t1||['','⚽'])}${col('a',m.t2||['','⚽'])}</div>`;
     }
     
-    // ===== تعديل لوحة الإحصائيات لعرض أسماء المنتخبات بوضوح هنا =====
     let statsHtml='',statsBtn='';
     if(m.stats && Object.keys(m.stats).length){
       const LB={pos:'الاستحواذ',shots:'التسديدات',sot:'على المرمى',corners:'الركنيات',fouls:'الأخطاء',yc:'بطاقات صفراء',rc:'بطاقات حمراء',off:'تسلل'};
@@ -747,8 +746,8 @@ function render(){
       const t1Name = m.t1 ? m.t1[0] : 'المستضيف';
       const t2Name = m.t2 ? m.t2[0] : 'الضيف';
       rows += `<div style="display:flex; justify-content:space-between; font-size:11px; color:var(--accent); font-weight:bold; padding:4px 10px; border-bottom:1px dashed var(--line); margin-bottom:8px; direction:rtl;">
-                 <span>📊 ${t1Name}</span>
-                 <span>${t2Name} 📊</span>
+                 <span>${t1Name}</span>
+                 <span>${t2Name}</span>
                </div>`;
 
       order.forEach(k=>{
