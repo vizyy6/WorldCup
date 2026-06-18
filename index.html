@@ -109,6 +109,38 @@
   .statsbtn{grid-column:1/-1;margin-top:10px;background:var(--bg2);border:1px solid var(--line);color:var(--mut);
     border-radius:9px;padding:6px 12px;font-family:'Tajawal';font-weight:700;font-size:12px;cursor:pointer;width:100%}
   .statsbtn:hover{color:var(--txt)}
+  .lineupbtn{grid-column:1/-1;margin-top:8px;background:var(--bg2);border:1px solid var(--line);color:var(--mut);
+    border-radius:9px;padding:6px 12px;font-family:'Tajawal';font-weight:700;font-size:12px;cursor:pointer;width:100%}
+  .lineupbtn:hover{color:var(--txt)}
+  /* لوحة التشكيلة */
+  .luoverlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:999;overflow:auto;padding:16px;display:flex;align-items:flex-start;justify-content:center}
+  .lubox{max-width:480px;width:100%;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px;margin:auto}
+  .luclose{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:20px;padding:6px 14px;font-family:'Tajawal';font-weight:700;font-size:13px;cursor:pointer;margin-bottom:12px}
+  .lu-head{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:10px}
+  .lu-side{display:flex;flex-direction:column;gap:2px}.lu-side.away{text-align:left}
+  .lu-team{font-weight:800;font-size:15px}.lu-form{font-size:12px;color:var(--accent);font-weight:700;direction:ltr}.lu-coach{font-size:11px;color:var(--mut)}
+  .pitch{position:relative;width:100%;aspect-ratio:68/105;border-radius:16px;overflow:hidden;margin:8px 0;
+    background:repeating-linear-gradient(0deg,#0d3b2e 0 9.09%,#0f4636 9.09% 18.18%);border:2px solid rgba(255,255,255,.25);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  .pitch .midline{position:absolute;top:50%;left:0;right:0;height:2px;background:rgba(255,255,255,.4)}
+  .pitch .circle{position:absolute;top:50%;left:50%;width:21%;aspect-ratio:1;border:2px solid rgba(255,255,255,.4);border-radius:50%;transform:translate(-50%,-50%)}
+  .pitch .spot{position:absolute;top:50%;left:50%;width:5px;height:5px;background:rgba(255,255,255,.6);border-radius:50%;transform:translate(-50%,-50%)}
+  .pitch .box{position:absolute;left:50%;transform:translateX(-50%);width:44%;height:14%;border:2px solid rgba(255,255,255,.35)}
+  .pitch .box.top{top:0;border-top:none}.pitch .box.bot{bottom:0;border-bottom:none}
+  .pitch .box6{position:absolute;left:50%;transform:translateX(-50%);width:22%;height:6%;border:2px solid rgba(255,255,255,.3)}
+  .pitch .box6.top{top:0;border-top:none}.pitch .box6.bot{bottom:0;border-bottom:none}
+  .pitch .goal{position:absolute;left:50%;transform:translateX(-50%);width:14%;height:1.5%;background:rgba(255,255,255,.5)}
+  .pitch .goal.top{top:0}.pitch .goal.bot{bottom:0}
+  .pl{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;width:64px}
+  .pl .shirt{position:relative;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:'Bebas Neue';font-size:16px;font-weight:700;border:2px solid rgba(255,255,255,.85);box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  .pl .shirt .flagbadge{position:absolute;top:-4px;right:-4px;font-size:11px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
+  .pl.home .shirt{background:var(--accent);color:#04221a}.pl.away .shirt{background:#e0356f;color:#fff}
+  .pl .nm{font-size:9px;font-weight:700;text-align:center;background:rgba(0,0,0,.62);padding:2px 6px;border-radius:6px;line-height:1.1;white-space:nowrap;letter-spacing:-.2px}
+  .bench{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:8px 0}
+  .bench h4{font-size:12px;color:var(--mut);margin-bottom:7px}.bench.home h4{color:var(--accent)}.bench.away h4{color:#e0356f}
+  .bench .subrow{display:flex;flex-wrap:wrap;gap:6px}
+  .bench .subchip{font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:3px 9px;color:var(--mut)}
+  .bench .subchip b{color:var(--txt)}
   .statspanel{grid-column:1/-1;margin-top:8px;padding-top:10px;border-top:1px dashed var(--line)}
   .statspanel .sthead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
   .statspanel .sthteam{font-size:12px;font-weight:800;color:var(--txt)}
@@ -514,6 +546,7 @@ function mergeScores(j){
     m.liveNow = best.status==='LIVE';
     m.finished = best.status==='FT';
     m.elapsed = best.elapsed||null;
+    if(best.id) m.fixtureId = best.id;
     const ng=(best.goals||[]).map(g=>({
       side: flip ? (g.side==='h'?'a':'h') : g.side,
       player:g.player, min:g.min, plus:g.plus, pen:g.pen, og:g.og
@@ -770,6 +803,10 @@ function render(){
         statsBtn=`<button class="statsbtn" onclick="const p=this.parentElement.querySelector('.statspanel');const o=p.style.display==='none';p.style.display=o?'block':'none';this.textContent=o?'▲ إخفاء الإحصائيات':'📊 إحصائيات المباراة'">📊 إحصائيات المباراة</button>`;
       }
     }
+    let lineupBtn='';
+    if(m.fixtureId && m.t1 && m.t2){
+      lineupBtn=`<button class="lineupbtn" onclick="openLineup(this,${m.fixtureId},'${(m.t1[1]||'').replace(/'/g,'')}','${(m.t2[1]||'').replace(/'/g,'')}')">👕 التشكيلة</button>`;
+    }
     el.innerHTML=`<div class="teams">${teamsHtml}</div>
       <div class="meta">${metaTop}
       ${stad?`<div class="stad">${stad}</div>`:''}
@@ -778,6 +815,7 @@ function render(){
       ${goalsHtml}
       ${statsBtn}
       ${statsHtml}
+      ${lineupBtn}
       ${probHtml}`;
     dg.appendChild(el);
   });
@@ -785,6 +823,63 @@ function render(){
 function setStatus(state,txt){
   const d=document.getElementById('dot');d.className='dot'+(state?' '+state:'');
   document.getElementById('statusTxt').textContent=txt;
+}
+async function openLineup(btn,fixtureId,flag1,flag2){
+  if(btn){btn.textContent='⏳ يحمّل…';btn.disabled=true;}
+  let data=null;
+  try{
+    const r=await fetch(WORKER_URL+'?lineup='+fixtureId,{cache:'no-store'});
+    if(r.ok)data=await r.json();
+  }catch(e){}
+  if(btn){btn.textContent='👕 التشكيلة';btn.disabled=false;}
+  if(!data||!data.teams||data.teams.length<2){
+    showLineupOverlay(`<div style="padding:30px;text-align:center;color:var(--mut)">التشكيلة غير متوفرة بعد لهذه المباراة.<br>تظهر عادةً قبل المباراة بساعة تقريباً.</div>`);
+    return;
+  }
+  const A=data.teams[0],B=data.teams[1];
+  const lastName=n=>n; // الاسم كما يجي من API (مختصر مشهور)
+  const pitchPlayers=(team,topHalf,flag)=>{
+    const players=team.start||[];
+    const rows=Math.max(1,...players.map(p=>p.grid?+String(p.grid).split(':')[0]:1));
+    return players.map(p=>{
+      let r=1,c=1;
+      if(p.grid){const g=String(p.grid).split(':');r=+g[0]||1;c=+g[1]||1;}
+      const colsInRow=players.filter(x=>x.grid&&(+String(x.grid).split(':')[0]===r)).length||1;
+      const frac=(r-1)/rows;
+      const y=topHalf?(4+frac*44):(96-frac*44);
+      const x=(c/(colsInRow+1))*100;
+      return `<div class="pl ${topHalf?'home':'away'}" style="top:${y}%;left:${x}%">
+        <div class="shirt">${p.num||''}<span class="flagbadge">${flag}</span></div>
+        <div class="nm">${lastName(p.name)}</div></div>`;
+    }).join('');
+  };
+  const bench=(team,cls)=>`<div class="bench ${cls}"><h4>بدلاء ${team.team}</h4><div class="subrow">${
+    (team.subs||[]).map(s=>`<span class="subchip"><b>${s.num||''}</b> ${s.name}</span>`).join('')||'<span class="subchip">غير متوفر</span>'
+  }</div></div>`;
+  const html=`
+    <div class="lu-head">
+      <div class="lu-side"><span class="lu-team">${flag1} ${A.team}</span><span class="lu-form">${A.formation||''}</span>${A.coach?`<span class="lu-coach">${A.coach}</span>`:''}</div>
+      <div class="lu-side away"><span class="lu-team">${B.team} ${flag2}</span><span class="lu-form">${B.formation||''}</span>${B.coach?`<span class="lu-coach">${B.coach}</span>`:''}</div>
+    </div>
+    ${bench(A,'home')}
+    <div class="pitch">
+      <div class="goal top"></div><div class="box6 top"></div><div class="box top"></div>
+      <div class="midline"></div><div class="circle"></div><div class="spot"></div>
+      <div class="goal bot"></div><div class="box6 bot"></div><div class="box bot"></div>
+      ${pitchPlayers(A,true,flag1)}${pitchPlayers(B,false,flag2)}
+    </div>
+    ${bench(B,'away')}`;
+  showLineupOverlay(html);
+  // تصغير الأسماء الطويلة لتبقى سطراً واحداً
+  setTimeout(()=>{document.querySelectorAll('#luOverlay .pl .nm').forEach(nm=>{const MAXW=76;if(nm.scrollWidth>MAXW){const s=Math.max(.7,MAXW/nm.scrollWidth);nm.style.fontSize=(9*s).toFixed(1)+'px';}});},30);
+}
+function showLineupOverlay(inner){
+  let o=document.getElementById('luOverlay');
+  if(o)o.remove();
+  o=document.createElement('div');o.id='luOverlay';o.className='luoverlay';
+  o.innerHTML=`<div class="lubox"><button class="luclose" onclick="document.getElementById('luOverlay').remove()">✕ إغلاق</button>${inner}</div>`;
+  o.addEventListener('click',e=>{if(e.target===o)o.remove();});
+  document.body.appendChild(o);
 }
 async function loadLive(){
   setStatus('','جارٍ التحديث…');
