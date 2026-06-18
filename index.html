@@ -207,7 +207,6 @@
   <h1>2026</h1>
   <div class="sub">الجدول الكامل · <b>بتوقيت الرياض</b></div>
   <div class="sub" style="margin-top:4px">١١ يونيو — ١٩ يوليو · ٤٨ منتخب · ١٠٤ مباراة</div>
-  <div class="by">by <span>Nawaf Almutairi</span></div>
   <div class="host">🇲🇽 🇺🇸 🇨🇦</div>
   <div class="status">
     <span class="dot" id="dot"></span><span id="statusTxt">جارٍ التحميل…</span>
@@ -910,9 +909,10 @@ async function openLineup(btn,fixtureId,flag1,flag2){
       });
     }
     return positioned.map(o=>{
-      // كل فريق يملأ نصف الملعب كامل رأسياً وأفقياً
-      const y=topHalf?(8+o.fy*40):(92-o.fy*40);
-      const x=4+(o.c/(o.cols+1))*92;
+      // كل فريق من المرمى (8%) حتى 44% فقط، فيبقى فراغ واضح عند المنتصف (50%) ولا يتراكب المهاجمون
+      // فراغ آمن عند المنتصف (لا تراكب)، وانتشار أفقي أوسع بين لاعبي الصف
+      const y=topHalf?(7+o.fy*37):(93-o.fy*37);
+      const x=3+(o.c/(o.cols+1))*94;
       return `<div class="pl" style="top:${y}%;left:${x}%">
         <div class="shirt" style="background:${kit.bg};color:${kit.fg};border-color:${kit.border||'rgba(255,255,255,.85)'}">${o.p.num||''}<span class="flagbadge">${flag}</span></div>
         <div class="nm">${o.p.name||''}</div></div>`;
@@ -1004,4 +1004,3 @@ window.addEventListener('scroll',()=>{
 });
 </script>
 </body>
-</html>
