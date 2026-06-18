@@ -17,13 +17,20 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
+  /* خط ثمانية (Thmanyah Sans) — مستضاف محلياً */
+  @font-face{font-family:'Thmanyah';src:url('fonts/thmanyahsans-Light.woff2') format('woff2');font-weight:300;font-display:swap}
+  @font-face{font-family:'Thmanyah';src:url('fonts/thmanyahsans-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+  @font-face{font-family:'Thmanyah';src:url('fonts/thmanyahsans-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+  @font-face{font-family:'Thmanyah';src:url('fonts/thmanyahsans-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+  @font-face{font-family:'Thmanyah';src:url('fonts/thmanyahsans-Black.woff2') format('woff2');font-weight:800;font-display:swap}
+  @font-face{font-family:'Thmanyah';src:url('fonts/thmanyahsans-Black.woff2') format('woff2');font-weight:900;font-display:swap}
   :root{
     --bg:#0a0e1a;--bg2:#0f1628;--card:#141d33;--card-hi:#1b2742;--line:#23304f;
     --txt:#eaf0ff;--mut:#8593b3;--accent:#00e0a4;--accent2:#ff3d7f;--gold:#ffcb45;
   }
-  body{font-family:'Tajawal',sans-serif;line-height:1.5;padding-bottom:60px;-webkit-tap-highlight-color:transparent;
+  body{font-family:'Thmanyah',sans-serif;line-height:1.5;padding-bottom:60px;-webkit-tap-highlight-color:transparent;
     background:radial-gradient(1200px 600px at 80% -10%,rgba(0,224,164,.10),transparent 60%),
       radial-gradient(1000px 500px at 0% 0%,rgba(255,61,127,.08),transparent 55%),var(--bg);color:var(--txt)}
   .wrap{max-width:780px;margin:0 auto;padding:0 14px}
@@ -42,13 +49,13 @@
   .dot.err{background:var(--accent2)}
   @keyframes p{0%{box-shadow:0 0 0 0 rgba(0,224,164,.5)}70%{box-shadow:0 0 0 8px rgba(0,224,164,0)}100%{box-shadow:0 0 0 0 rgba(0,224,164,0)}}
   .refresh{background:var(--card);border:1px solid var(--line);color:var(--mut);border-radius:20px;
-    padding:5px 12px;font-family:'Tajawal';font-weight:700;font-size:12px;cursor:pointer}
+    padding:5px 12px;font-family:'Thmanyah';font-weight:700;font-size:12px;cursor:pointer}
   .refresh:hover{color:var(--txt)}
   .filters{position:sticky;top:0;z-index:30;background:rgba(10,14,26,.86);backdrop-filter:blur(12px);
     border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:18px}
   .frow{display:flex;gap:8px;overflow-x:auto;padding:0 14px;scrollbar-width:none}.frow::-webkit-scrollbar{display:none}
   .chip{flex:0 0 auto;background:var(--card);border:1px solid var(--line);color:var(--mut);padding:8px 15px;
-    border-radius:30px;font-family:'Tajawal';font-weight:700;font-size:14px;cursor:pointer;transition:.2s;white-space:nowrap}
+    border-radius:30px;font-family:'Thmanyah';font-weight:700;font-size:14px;cursor:pointer;transition:.2s;white-space:nowrap}
   .chip:hover{color:var(--txt)}
   .chip.on{background:linear-gradient(120deg,var(--accent),#00b389);color:#04221a;border-color:transparent}
   .chip.ksaC.on{background:linear-gradient(120deg,var(--gold),#ffb000);color:#3a2600}
@@ -81,7 +88,7 @@
   .vs{color:var(--mut);font-size:12px;font-weight:500;padding-right:35px}
   .meta{text-align:left;direction:ltr;display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:108px}
   .time{font-family:'Bebas Neue';font-size:30px;color:var(--txt);line-height:.9;letter-spacing:1px}
-  .ampm{font-size:13px;color:var(--accent);font-family:'Tajawal';font-weight:700}
+  .ampm{font-size:13px;color:var(--accent);font-family:'Thmanyah';font-weight:700}
   .ft{font-size:11px;font-weight:800;color:var(--accent2);background:rgba(255,61,127,.12);border:1px solid rgba(255,61,127,.3);padding:2px 8px;border-radius:6px}
   .stad{color:var(--txt);font-size:12.5px;font-weight:700;direction:rtl;text-align:left;line-height:1.25}
   .city{color:var(--mut);font-size:12px;direction:rtl;text-align:left}
@@ -104,18 +111,18 @@
   .gmin{color:var(--accent);font-weight:800;font-size:11.5px;direction:ltr;flex:0 0 auto}
   .grow.a .gmin{color:#9fb0e6}
   .gmorewrap{display:flex;flex-direction:column;gap:4px}
-  .gmore{background:none;border:1px solid var(--line);color:var(--mut);border-radius:8px;padding:3px 10px;font-family:'Tajawal';font-weight:700;font-size:11px;cursor:pointer;align-self:flex-start;margin-top:2px}
+  .gmore{background:none;border:1px solid var(--line);color:var(--mut);border-radius:8px;padding:3px 10px;font-family:'Thmanyah';font-weight:700;font-size:11px;cursor:pointer;align-self:flex-start;margin-top:2px}
   .gmore:hover{color:var(--txt)}
   .statsbtn{grid-column:1/-1;margin-top:10px;background:var(--bg2);border:1px solid var(--line);color:var(--mut);
-    border-radius:9px;padding:6px 12px;font-family:'Tajawal';font-weight:700;font-size:12px;cursor:pointer;width:100%}
+    border-radius:9px;padding:6px 12px;font-family:'Thmanyah';font-weight:700;font-size:12px;cursor:pointer;width:100%}
   .statsbtn:hover{color:var(--txt)}
   .lineupbtn{grid-column:1/-1;margin-top:8px;background:var(--bg2);border:1px solid var(--line);color:var(--mut);
-    border-radius:9px;padding:6px 12px;font-family:'Tajawal';font-weight:700;font-size:12px;cursor:pointer;width:100%}
+    border-radius:9px;padding:6px 12px;font-family:'Thmanyah';font-weight:700;font-size:12px;cursor:pointer;width:100%}
   .lineupbtn:hover{color:var(--txt)}
   /* لوحة التشكيلة */
   .luoverlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:999;overflow:auto;padding:16px;display:flex;align-items:flex-start;justify-content:center}
   .lubox{max-width:480px;width:100%;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px;margin:auto}
-  .luclose{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:20px;padding:6px 14px;font-family:'Tajawal';font-weight:700;font-size:13px;cursor:pointer;margin-bottom:12px}
+  .luclose{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:20px;padding:6px 14px;font-family:'Thmanyah';font-weight:700;font-size:13px;cursor:pointer;margin-bottom:12px}
   .lu-head{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:10px}
   .lu-side{display:flex;flex-direction:column;gap:2px}.lu-side.away{text-align:left}
   .lu-team{font-weight:800;font-size:15px}.lu-form{font-size:12px;color:var(--accent);font-weight:700;direction:ltr}.lu-coach{font-size:11px;color:var(--mut)}
@@ -174,7 +181,7 @@
   .note{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 20px;color:var(--mut);font-size:13.5px}
   .note b{color:var(--txt)}
   .hidefin{display:inline-block;margin:0 0 16px;padding:7px 14px;border-radius:20px;cursor:pointer;
-    font-family:'Tajawal';font-weight:700;font-size:12.5px;transition:.2s;
+    font-family:'Thmanyah';font-weight:700;font-size:12.5px;transition:.2s;
     background:linear-gradient(120deg,var(--accent),#00b389);color:#04221a;border:1px solid transparent}
   .hidefin.off{background:transparent;color:var(--mut);border:1px solid var(--line)}
   .hidefin.off:hover{color:var(--txt)}
@@ -599,11 +606,11 @@ function showExport(){
   const txt=buildResultsSnippet();
   const o=document.createElement('div');
   o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;padding:20px;overflow:auto';
-  o.innerHTML=`<div style="max-width:780px;margin:0 auto;color:#eaf0ff;font-family:Tajawal">
+  o.innerHTML=`<div style="max-width:780px;margin:0 auto;color:#eaf0ff;font-family:Thmanyah">
     <h3 style="margin-bottom:8px">📋 انسخ هذا والصقه مكان RESULTS في index.html لتثبيت النتائج للأبد</h3>
     <p style="color:#8593b3;font-size:13px;margin-bottom:10px">يحتوي كل المباريات المنتهية حتى الآن بنتائجها ومسجّليها.</p>
     <textarea readonly style="width:100%;height:60vh;background:#0f1628;color:#9fe0c8;border:1px solid #23304f;border-radius:10px;padding:12px;font-family:monospace;font-size:12px;direction:ltr">${txt.replace(/</g,'&lt;')}</textarea>
-    <button onclick="this.parentElement.parentElement.remove();location.hash=''" style="margin-top:10px;background:#00e0a4;color:#04221a;border:none;border-radius:10px;padding:10px 20px;font-weight:800;cursor:pointer;font-family:Tajawal">إغلاق</button>
+    <button onclick="this.parentElement.parentElement.remove();location.hash=''" style="margin-top:10px;background:#00e0a4;color:#04221a;border:none;border-radius:10px;padding:10px 20px;font-weight:800;cursor:pointer;font-family:Thmanyah">إغلاق</button>
   </div>`;
   document.body.appendChild(o);
 }
