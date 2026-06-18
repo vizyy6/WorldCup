@@ -1005,3 +1005,12 @@ pollLoop();
 // أداة التثبيت: افتح الرابط بـ #export لاستخراج النتائج الدائمة
 if(location.hash==='#export'){ loadLive().then(()=>loadScores(true)).then(()=>setTimeout(showExport,1500)); }
 
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+window.addEventListener('scroll',()=>{
+  const b=document.getElementById('toTop');if(b)b.classList.toggle('show',window.scrollY>400);
+});
+</script>
+</body>
+</html>
