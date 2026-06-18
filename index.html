@@ -910,8 +910,9 @@ async function openLineup(btn,fixtureId,flag1,flag2){
       });
     }
     return positioned.map(o=>{
-      const y=topHalf?(6+o.fy*42):(94-o.fy*42);
-      const x=6+(o.c/(o.cols+1))*88;
+      // كل فريق يملأ نصف الملعب كامل رأسياً وأفقياً
+      const y=topHalf?(8+o.fy*40):(92-o.fy*40);
+      const x=4+(o.c/(o.cols+1))*92;
       return `<div class="pl" style="top:${y}%;left:${x}%">
         <div class="shirt" style="background:${kit.bg};color:${kit.fg};border-color:${kit.border||'rgba(255,255,255,.85)'}">${o.p.num||''}<span class="flagbadge">${flag}</span></div>
         <div class="nm">${o.p.name||''}</div></div>`;
