@@ -54,6 +54,10 @@
   .chip.ksaC.on{background:linear-gradient(120deg,var(--gold),#ffb000);color:#3a2600}
   .daygroup{margin-bottom:26px}
   .dayhead{display:flex;align-items:baseline;gap:10px;padding:6px 4px 12px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .dayhead.today{border-bottom-color:var(--accent)}
+  .dayhead.today .dnum{color:var(--gold)}
+  .todaybadge{margin-right:auto;background:linear-gradient(120deg,var(--accent),#00b389);color:#04221a;
+    font-size:11px;font-weight:800;padding:3px 11px;border-radius:20px;align-self:center}
   .dnum{font-family:'Bebas Neue';font-size:34px;color:var(--accent);line-height:1;direction:ltr}
   .dwords{font-weight:800;font-size:17px}.ddow{color:var(--mut);font-size:14px;font-weight:500}
   .match{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:10px;
@@ -157,6 +161,11 @@
   .bmeta{font-size:10.5px;color:var(--mut);margin-top:5px;padding-top:5px;border-top:1px dashed var(--line);direction:rtl}
   .bft{color:var(--accent2);font-weight:800}.blive{color:#1fe3aa;font-weight:800}
   footer{text-align:center;color:var(--mut);font-size:12px;margin-top:30px;padding:0 14px}
+  .totop{position:fixed;bottom:20px;left:20px;z-index:40;width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(120deg,var(--accent),#00b389);color:#04221a;border:none;font-size:22px;font-weight:900;
+    cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;line-height:1;transition:.2s}
+  .totop:hover{transform:translateY(-2px)}
+  .totop.show{display:flex}
 </style>
 </head>
 <body>
@@ -198,6 +207,7 @@
   <div class="empty" id="empty" style="display:none">ما فيه مباريات في هذا التصنيف.</div>
 </div>
 
+<button id="toTop" class="totop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="أعلى الصفحة">↑</button>
 <footer>التواريخ والتواقيت قابلة للتعديل من المنظّمين</footer>
 
 <script>
@@ -682,11 +692,13 @@ function render(){
   if(!rows.length){empty.style.display='block';return}
   empty.style.display='none';
   let lastDay=null,dg=null;
+  const todayStr=(()=>{const n=new Date();const u=new Date(n.getTime()+(n.getTimezoneOffset()+180)*60000);return u.getDate()+" "+MON[u.getMonth()];})();
   rows.forEach(m=>{
     if(m.day!==lastDay){
       dg=document.createElement('div');dg.className='daygroup';
       const p=m.day.split(' ');
-      dg.innerHTML=`<div class="dayhead"><span class="dnum">${p[0]}</span><span class="dwords">${p[1]}</span><span class="ddow">${m.dow}</span></div>`;
+      const isToday=m.day===todayStr;
+      dg.innerHTML=`<div class="dayhead${isToday?' today':''}"><span class="dnum">${p[0]}</span><span class="dwords">${p[1]}</span><span class="ddow">${m.dow}</span>${isToday?'<span class="todaybadge">اليوم</span>':''}</div>`;
       list.appendChild(dg);lastDay=m.day;
     }
     const isKsa=(m.t1raw==='saudi arabia'||m.t2raw==='saudi arabia');
@@ -824,6 +836,9 @@ if(location.hash==='#export'){ loadLive().then(()=>loadScores(true)).then(()=>se
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
+window.addEventListener('scroll',()=>{
+  const b=document.getElementById('toTop');if(b)b.classList.toggle('show',window.scrollY>400);
+});
 </script>
 </body>
 </html>
