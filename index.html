@@ -141,6 +141,9 @@
   .bench .subrow{display:flex;flex-wrap:wrap;gap:6px}
   .bench .subchip{font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:3px 9px;color:var(--mut)}
   .bench .subchip b{color:var(--txt)}
+  .bench .subchip.camein{border-color:var(--accent);color:var(--txt)}
+  .bench .subchip .arr.in{color:var(--accent);font-weight:900;font-size:12px}
+  .pl .subout{position:absolute;top:-4px;left:-4px;font-size:13px;color:#ff3d5a;font-weight:900;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7))}
   .statspanel{grid-column:1/-1;margin-top:8px;padding-top:10px;border-top:1px dashed var(--line)}
   .statspanel .sthead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
   .statspanel .sthteam{font-size:12px;font-weight:800;color:var(--txt)}
@@ -207,6 +210,7 @@
   <h1>2026</h1>
   <div class="sub">الجدول الكامل · <b>بتوقيت الرياض</b></div>
   <div class="sub" style="margin-top:4px">١١ يونيو — ١٩ يوليو · ٤٨ منتخب · ١٠٤ مباراة</div>
+  <div class="by">by <span>Nawaf</span></div>
   <div class="host">🇲🇽 🇺🇸 🇨🇦</div>
   <div class="status">
     <span class="dot" id="dot"></span><span id="statusTxt">جارٍ التحميل…</span>
@@ -871,6 +875,10 @@ async function openLineup(btn,fixtureId,flag1,flag2){
     return;
   }
   const A=data.teams[0],B=data.teams[1];
+  // مجموعات التبديل: من دخل ومن خرج (بالاسم) مع الدقيقة
+  const subsList=data.subsList||[];
+  const cameIn={}, wentOut={};
+  subsList.forEach(s=>{ if(s.inP)cameIn[s.inP]={min:s.min,plus:s.plus}; if(s.outP)wentOut[s.outP]={min:s.min,plus:s.plus}; });
   const arA=arTeam(A.team), arB=arTeam(B.team);
   // ألوان الأطقم الأساسية لكل منتخب (لون القميص، لون الرقم) — بالاسم العربي
   const kitA=teamKit(arA,A.teamId), kitBraw=teamKit(arB,B.teamId);
@@ -913,13 +921,14 @@ async function openLineup(btn,fixtureId,flag1,flag2){
       // فراغ آمن عند المنتصف (لا تراكب)، وانتشار أفقي أوسع بين لاعبي الصف
       const y=topHalf?(7+o.fy*37):(93-o.fy*37);
       const x=3+(o.c/(o.cols+1))*94;
+      const out=wentOut[o.p.name];
       return `<div class="pl" style="top:${y}%;left:${x}%">
-        <div class="shirt" style="background:${kit.bg};color:${kit.fg};border-color:${kit.border||'rgba(255,255,255,.85)'}">${o.p.num||''}<span class="flagbadge">${flag}</span></div>
+        <div class="shirt" style="background:${kit.bg};color:${kit.fg};border-color:${kit.border||'rgba(255,255,255,.85)'}">${o.p.num||''}<span class="flagbadge">${flag}</span>${out?'<span class="subout">↓</span>':''}</div>
         <div class="nm">${o.p.name||''}</div></div>`;
     }).join('');
   };
   const bench=(team,arName,cls)=>`<div class="bench ${cls}"><h4>بدلاء ${arName}</h4><div class="subrow">${
-    (team.subs||[]).map(s=>`<span class="subchip"><b>${s.num||''}</b> ${s.name}</span>`).join('')||'<span class="subchip">غير متوفر</span>'
+    (team.subs||[]).map(s=>{const inn=cameIn[s.name];return `<span class="subchip${inn?' camein':''}">${inn?'<span class="arr in">↑</span>':''}<b>${s.num||''}</b> ${s.name}</span>`;}).join('')||'<span class="subchip">غير متوفر</span>'
   }</div></div>`;
   const html=`
     <div class="lu-head">
@@ -996,11 +1005,3 @@ pollLoop();
 // أداة التثبيت: افتح الرابط بـ #export لاستخراج النتائج الدائمة
 if(location.hash==='#export'){ loadLive().then(()=>loadScores(true)).then(()=>setTimeout(showExport,1500)); }
 
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-}
-window.addEventListener('scroll',()=>{
-  const b=document.getElementById('toTop');if(b)b.classList.toggle('show',window.scrollY>400);
-});
-</script>
-</body>
