@@ -824,6 +824,41 @@ function setStatus(state,txt){
   const d=document.getElementById('dot');d.className='dot'+(state?' '+state:'');
   document.getElementById('statusTxt').textContent=txt;
 }
+// ===== أطقم المنتخبات (اللون الأساسي المعروف) =====
+const KITS={
+ "السعودية":["#0a8a4a","#fff"],"الأرجنتين":["#6cabdd","#0b2a52"],"البرازيل":["#ffd400","#0a7d34"],
+ "فرنسا":["#1a2b6b","#fff"],"إسبانيا":["#c8102e","#ffd400"],"إنجلترا":["#fff","#1a2b6b","#cfd6e6"],
+ "ألمانيا":["#fff","#111","#cfd6e6"],"البرتغال":["#9b1b30","#0a6b3b"],"هولندا":["#f36c21","#fff"],
+ "المغرب":["#c1272d","#0a7d34"],"بلجيكا":["#b3122b","#ffcd00"],"كرواتيا":["#e7e7e7","#c8102e","#bbb"],
+ "أوروغواي":["#5aaaee","#111"],"المكسيك":["#0a7d34","#fff"],"الولايات المتحدة":["#fff","#1a2b6b","#cfd6e6"],
+ "اليابان":["#0b1f66","#fff"],"كوريا الجنوبية":["#c8102e","#fff"],"سويسرا":["#d52b1e","#fff"],
+ "إيران":["#fff","#c8102e","#cfd6e6"],"تركيا":["#c8102e","#fff"],"الإكوادور":["#ffd400","#0033a0"],
+ "النمسا":["#c8102e","#fff"],"أستراليا":["#ffd400","#0a7d34"],"الجزائر":["#0a7d34","#fff"],
+ "مصر":["#c8102e","#fff"],"كندا":["#c8102e","#fff"],"النرويج":["#c8102e","#fff"],
+ "بنما":["#c8102e","#fff"],"ساحل العاج":["#f36c21","#fff"],"السويد":["#ffd400","#0b1f66"],
+ "باراغواي":["#c8102e","#0033a0"],"التشيك":["#c8102e","#fff"],"اسكتلندا":["#1a3a6b","#fff"],
+ "تونس":["#c8102e","#fff"],"الكونغو الديمقراطية":["#0a7d34","#fff"],"أوزبكستان":["#fff","#0a7d34","#cfd6e6"],
+ "قطر":["#7a1431","#fff"],"العراق":["#0a7d34","#fff"],"جنوب أفريقيا":["#0a7d34","#ffd400"],
+ "الأردن":["#c8102e","#fff"],"البوسنة والهرسك":["#0033a0","#ffd400"],"الرأس الأخضر":["#0a3b8a","#fff"],
+ "غانا":["#fff","#c8102e","#cfd6e6"],"كوراساو":["#0033a0","#fff"],"هايتي":["#0a3b8a","#c8102e"],
+ "نيوزيلندا":["#111","#fff"],"كولومبيا":["#ffd400","#0033a0"],"السنغال":["#0a7d34","#fff"],"كوراكاو":["#0033a0","#fff"]
+};
+function teamKit(name,id){
+  const k=KITS[(name||'').trim()];
+  if(k)return {bg:k[0].replace(/\s/g,''),fg:k[1],border:k[2]||'rgba(255,255,255,.85)'};
+  return {bg:'#00e0a4',fg:'#04221a',border:'rgba(255,255,255,.85)'}; // افتراضي
+}
+function hexToRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return [n>>16&255,n>>8&255,n&255];}
+function colorsClash(a,b){
+  try{const [r1,g1,b1]=hexToRgb(a),[r2,g2,b2]=hexToRgb(b);
+    const d=Math.sqrt((r1-r2)**2+(g1-g2)**2+(b1-b2)**2);return d<110;}catch(e){return false;}
+}
+function altKit(kit){
+  // طقم احتياطي: لو الأساسي فاتح خذ داكن، والعكس
+  const [r,g,b]=hexToRgb(kit.bg);const lum=(0.299*r+0.587*g+0.114*b);
+  return lum>140 ? {bg:'#16213e',fg:'#fff',border:'rgba(255,255,255,.7)'} : {bg:'#f0f0f0',fg:'#111',border:'rgba(0,0,0,.3)'};
+}
+function arTeam(en){const k=NAME[norm(en)];return k?k[0]:en;}
 async function openLineup(btn,fixtureId,flag1,flag2){
   if(btn){btn.textContent='⏳ يحمّل…';btn.disabled=true;}
   let data=null;
@@ -837,38 +872,67 @@ async function openLineup(btn,fixtureId,flag1,flag2){
     return;
   }
   const A=data.teams[0],B=data.teams[1];
-  const lastName=n=>n; // الاسم كما يجي من API (مختصر مشهور)
-  const pitchPlayers=(team,topHalf,flag)=>{
-    const players=team.start||[];
-    const rows=Math.max(1,...players.map(p=>p.grid?+String(p.grid).split(':')[0]:1));
-    return players.map(p=>{
-      let r=1,c=1;
-      if(p.grid){const g=String(p.grid).split(':');r=+g[0]||1;c=+g[1]||1;}
-      const colsInRow=players.filter(x=>x.grid&&(+String(x.grid).split(':')[0]===r)).length||1;
-      const frac=(r-1)/rows;
-      const y=topHalf?(4+frac*44):(96-frac*44);
-      const x=(c/(colsInRow+1))*100;
-      return `<div class="pl ${topHalf?'home':'away'}" style="top:${y}%;left:${x}%">
-        <div class="shirt">${p.num||''}<span class="flagbadge">${flag}</span></div>
-        <div class="nm">${lastName(p.name)}</div></div>`;
+  const arA=arTeam(A.team), arB=arTeam(B.team);
+  // ألوان الأطقم الأساسية لكل منتخب (لون القميص، لون الرقم) — بالاسم العربي
+  const kitA=teamKit(arA,A.teamId), kitBraw=teamKit(arB,B.teamId);
+  // كشف تشابه اللون: لو متقاربين، الفريق الثاني ياخذ طقمه الاحتياطي (أبيض/داكن)
+  const kitB = colorsClash(kitA.bg,kitBraw.bg) ? altKit(kitBraw) : kitBraw;
+  const lastName=n=>n;
+  const pitchPlayers=(team,topHalf,flag,kit)=>{
+    let players=(team.start||[]).slice();
+    if(!players.length)return '';
+    const haveGrid=players.filter(p=>p.grid).length>=players.length-1; // أغلبهم له grid؟
+    let positioned=[];
+    if(haveGrid){
+      // استخدم grid من API
+      const rows=Math.max(1,...players.map(p=>p.grid?+String(p.grid).split(':')[0]:1));
+      positioned=players.map(p=>{
+        let r=1,c=1;
+        if(p.grid){const g=String(p.grid).split(':');r=+g[0]||1;c=+g[1]||1;}
+        const colsInRow=players.filter(x=>x.grid&&(+String(x.grid).split(':')[0]===r)).length||1;
+        const frac=rows>1?(r-1)/(rows-1):0;
+        return {p, fy:frac, c, cols:colsInRow};
+      });
+    }else{
+      // لا يوجد grid: رتّب اللاعبين حسب المركز (حارس/دفاع/وسط/هجوم) في صفوف تلقائية
+      const posRank=q=>{const x=(q||'').toUpperCase();return x==='G'?0:x==='D'?1:x==='M'?2:x==='F'?3:2;};
+      const groups={0:[],1:[],2:[],3:[]};
+      players.forEach(p=>groups[posRank(p.pos)].push(p));
+      // لو ما فيه معلومات مركز إطلاقاً، وزّعهم 1-4-3-3 تقريبياً
+      if(!groups[0].length&&!groups[1].length&&!groups[2].length&&!groups[3].length){
+        groups[0]=players.slice(0,1);groups[1]=players.slice(1,5);groups[2]=players.slice(5,8);groups[3]=players.slice(8);
+      }
+      const order=[0,1,2,3].filter(g=>groups[g].length);
+      order.forEach((g,ri)=>{
+        const line=groups[g];
+        const frac=order.length>1?ri/(order.length-1):0;
+        line.forEach((p,ci)=>positioned.push({p, fy:frac, c:ci+1, cols:line.length}));
+      });
+    }
+    return positioned.map(o=>{
+      const y=topHalf?(6+o.fy*42):(94-o.fy*42);
+      const x=6+(o.c/(o.cols+1))*88;
+      return `<div class="pl" style="top:${y}%;left:${x}%">
+        <div class="shirt" style="background:${kit.bg};color:${kit.fg};border-color:${kit.border||'rgba(255,255,255,.85)'}">${o.p.num||''}<span class="flagbadge">${flag}</span></div>
+        <div class="nm">${o.p.name||''}</div></div>`;
     }).join('');
   };
-  const bench=(team,cls)=>`<div class="bench ${cls}"><h4>بدلاء ${team.team}</h4><div class="subrow">${
+  const bench=(team,arName,cls)=>`<div class="bench ${cls}"><h4>بدلاء ${arName}</h4><div class="subrow">${
     (team.subs||[]).map(s=>`<span class="subchip"><b>${s.num||''}</b> ${s.name}</span>`).join('')||'<span class="subchip">غير متوفر</span>'
   }</div></div>`;
   const html=`
     <div class="lu-head">
-      <div class="lu-side"><span class="lu-team">${flag1} ${A.team}</span><span class="lu-form">${A.formation||''}</span>${A.coach?`<span class="lu-coach">${A.coach}</span>`:''}</div>
-      <div class="lu-side away"><span class="lu-team">${B.team} ${flag2}</span><span class="lu-form">${B.formation||''}</span>${B.coach?`<span class="lu-coach">${B.coach}</span>`:''}</div>
+      <div class="lu-side"><span class="lu-team">${flag1} ${arA}</span><span class="lu-form">${A.formation||''}</span>${A.coach?`<span class="lu-coach">المدرب: ${A.coach}</span>`:''}</div>
+      <div class="lu-side away"><span class="lu-team">${arB} ${flag2}</span><span class="lu-form">${B.formation||''}</span>${B.coach?`<span class="lu-coach">المدرب: ${B.coach}</span>`:''}</div>
     </div>
-    ${bench(A,'home')}
+    ${bench(A,arA,'home')}
     <div class="pitch">
       <div class="goal top"></div><div class="box6 top"></div><div class="box top"></div>
       <div class="midline"></div><div class="circle"></div><div class="spot"></div>
       <div class="goal bot"></div><div class="box6 bot"></div><div class="box bot"></div>
-      ${pitchPlayers(A,true,flag1)}${pitchPlayers(B,false,flag2)}
+      ${pitchPlayers(A,true,flag1,kitA)}${pitchPlayers(B,false,flag2,kitB)}
     </div>
-    ${bench(B,'away')}`;
+    ${bench(B,arB,'away')}`;
   showLineupOverlay(html);
   // تصغير الأسماء الطويلة لتبقى سطراً واحداً
   setTimeout(()=>{document.querySelectorAll('#luOverlay .pl .nm').forEach(nm=>{const MAXW=76;if(nm.scrollWidth>MAXW){const s=Math.max(.7,MAXW/nm.scrollWidth);nm.style.fontSize=(9*s).toFixed(1)+'px';}});},30);
