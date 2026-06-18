@@ -465,6 +465,7 @@ function applyGoalsCache(){
     if(saved.score&&!m.score)m.score=saved.score;
     if(saved.finished)m.finished=true;
     if(saved.goals&&saved.goals.length&&!(m.goals&&m.goals.length))m.goals=saved.goals;
+    if(saved.stats&&Object.keys(saved.stats).length&&!(m.stats&&Object.keys(m.stats).length))m.stats=saved.stats;
   });
 }
 function saveMatchGoals(m){
@@ -475,6 +476,7 @@ function saveMatchGoals(m){
     score:m.score||prev.score||null,
     finished:!!m.finished||!!prev.finished,
     goals:(m.goals&&m.goals.length)?m.goals:(prev.goals||[]),
+    stats:(m.stats&&Object.keys(m.stats).length)?m.stats:(prev.stats||null),
     savedAt:Date.now()
   };
   writeGoalsCache(cache);
@@ -752,16 +754,17 @@ function render(){
       const LB={pos:'الاستحواذ',shots:'التسديدات',sot:'على المرمى',corners:'الركنيات',fouls:'الأخطاء',yc:'بطاقات صفراء',rc:'بطاقات حمراء',off:'تسلل'};
       const order=['pos','shots','sot','corners','fouls','yc','rc','off'];
       const toNum=x=>typeof x==='string'?(parseFloat(x)||0):(x||0);
-      let rows='',hasReal=false;
+      let rows='',realCount=0;
       order.forEach(k=>{
         const v=m.stats[k];if(!v||(v.h==null&&v.a==null))return;
         const hv=v.h==null?0:v.h, av=v.a==null?0:v.a;
         const hn=toNum(hv),an=toNum(av),tot=hn+an;
-        if(tot>0)hasReal=true;
+        realCount++;
         const hpct=tot>0?Math.round(hn/tot*100):50;
         rows+=`<div class="stlbl">${LB[k]}</div><div class="strow"><span class="stv">${hv}</span><div class="stbarwrap"><span class="stbar sth" style="width:${hpct}%"></span></div><span class="stv">${av}</span></div>`;
       });
-      if(rows && hasReal){
+      // اعرض لو فيه إحصائيتان حقيقيتان على الأقل (الاستحواذ والتسديدات مثلاً)
+      if(rows && realCount>=2){
         const head=`<div class="sthead"><span class="sthteam">${m.t1[1]||''} ${m.t1[0]}</span><span class="sthteam">${m.t2[0]} ${m.t2[1]||''}</span></div>`;
         statsHtml=`<div class="statspanel" style="display:none">${head}${rows}</div>`;
         statsBtn=`<button class="statsbtn" onclick="const p=this.parentElement.querySelector('.statspanel');const o=p.style.display==='none';p.style.display=o?'block':'none';this.textContent=o?'▲ إخفاء الإحصائيات':'📊 إحصائيات المباراة'">📊 إحصائيات المباراة</button>`;
