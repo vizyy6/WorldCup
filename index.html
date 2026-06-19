@@ -1017,7 +1017,27 @@ pollLoop();
 if(location.hash==='#export'){ loadLive().then(()=>loadScores(true)).then(()=>setTimeout(showExport,1500)); }
 
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      // تحقّق من وجود تحديث فوراً
+      reg.update();
+      // لو وصل service worker جديد، فعّله وأعد التحميل مرة واحدة ليرى الزائر أحدث نسخة
+      reg.addEventListener('updatefound',()=>{
+        const nw=reg.installing;
+        if(!nw)return;
+        nw.addEventListener('statechange',()=>{
+          if(nw.state==='installed' && navigator.serviceWorker.controller){
+            nw.postMessage&&nw.postMessage('skip');
+          }
+        });
+      });
+    }).catch(()=>{});
+    // عند تبديل الـ service worker المتحكم، أعد التحميل مرة واحدة فقط
+    let reloaded=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(reloaded)return; reloaded=true; location.reload();
+    });
+  });
 }
 window.addEventListener('scroll',()=>{
   const b=document.getElementById('toTop');if(b)b.classList.toggle('show',window.scrollY>400);
