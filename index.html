@@ -1009,7 +1009,7 @@ function anyLiveNow(){
   return DATA.some(m => m.liveNow || shouldBeLive(m));
 }
 function pollLoop(){
-  const wait = anyLiveNow() ? 10*1000 : 3*60*1000;
+  const wait = anyLiveNow() ? 10*1000 : 60*1000;
   setTimeout(async ()=>{ await loadScores(); render(); pollLoop(); }, wait);
 }
 pollLoop();
