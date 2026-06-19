@@ -149,8 +149,8 @@
   .bench .subchip{font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:3px 9px;color:var(--mut)}
   .bench .subchip b{color:var(--txt)}
   .bench .subchip.camein{border-color:var(--accent);color:var(--txt)}
-  .bench .subchip .arr.in{color:var(--accent);font-weight:900;font-size:12px}
-  .pl .subout{position:absolute;top:-4px;left:-4px;font-size:13px;color:#ff3d5a;font-weight:900;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7))}
+  .bench .subchip .arr.in{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--accent);color:#04221a;border:1.5px solid #fff;font-size:10px;font-weight:900;line-height:1;margin-left:2px;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+  .pl .subout{position:absolute;top:-5px;left:-5px;width:15px;height:15px;border-radius:50%;background:#ff3d5a;color:#fff;border:1.5px solid #fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.5)}
   .statspanel{grid-column:1/-1;margin-top:8px;padding-top:10px;border-top:1px dashed var(--line)}
   .statspanel .sthead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line);direction:ltr}
   .statspanel .sthteam{font-size:12px;font-weight:800;color:var(--txt)}
@@ -934,9 +934,12 @@ async function openLineup(btn,fixtureId,flag1,flag2){
         <div class="nm">${o.p.name||''}</div></div>`;
     }).join('');
   };
-  const bench=(team,arName,cls)=>`<div class="bench ${cls}"><h4>بدلاء ${arName}</h4><div class="subrow">${
-    (team.subs||[]).map(s=>{const inn=cameIn[s.name];return `<span class="subchip${inn?' camein':''}">${inn?'<span class="arr in">↑</span>':''}<b>${s.num||''}</b> ${s.name}</span>`;}).join('')||'<span class="subchip">غير متوفر</span>'
+  const bench=(team,arName,cls)=>{
+    const arrow = cls==='home' ? '↓' : '↑';  // العلوية تأشّر لتحت، السفلية لفوق (نحو الملعب)
+    return `<div class="bench ${cls}"><h4>بدلاء ${arName}</h4><div class="subrow">${
+    (team.subs||[]).map(s=>{const inn=cameIn[s.name];return `<span class="subchip${inn?' camein':''}">${inn?`<span class="arr in">${arrow}</span>`:''}<b>${s.num||''}</b> ${s.name}</span>`;}).join('')||'<span class="subchip">غير متوفر</span>'
   }</div></div>`;
+  };
   const html=`
     <div class="lu-head">
       <div class="lu-side"><span class="lu-team">${flag1} ${arA}</span><span class="lu-form">${A.formation||''}</span>${A.coach?`<span class="lu-coach">المدرب: ${A.coach}</span>`:''}</div>
@@ -1018,6 +1021,3 @@ if('serviceWorker' in navigator){
 window.addEventListener('scroll',()=>{
   const b=document.getElementById('toTop');if(b)b.classList.toggle('show',window.scrollY>400);
 });
-</script>
-</body>
-</html>
