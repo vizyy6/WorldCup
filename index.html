@@ -929,8 +929,9 @@ async function openLineup(btn,fixtureId,flag1,flag2){
       const y=topHalf?(7+o.fy*37):(93-o.fy*37);
       const x=3+(o.c/(o.cols+1))*94;
       const out=wentOut[o.p.name];
+      const outArrow = topHalf ? '↑' : '↓';   // العلوي يأشّر لفوق لدكته، السفلي لتحت لدكته
       return `<div class="pl" style="top:${y}%;left:${x}%">
-        <div class="shirt" style="background:${kit.bg};color:${kit.fg};border-color:${kit.border||'rgba(255,255,255,.85)'}">${o.p.num||''}<span class="flagbadge">${flag}</span>${out?'<span class="subout">↓</span>':''}</div>
+        <div class="shirt" style="background:${kit.bg};color:${kit.fg};border-color:${kit.border||'rgba(255,255,255,.85)'}">${o.p.num||''}<span class="flagbadge">${flag}</span>${out?`<span class="subout">${outArrow}</span>`:''}</div>
         <div class="nm">${o.p.name||''}</div></div>`;
     }).join('');
   };
