@@ -157,8 +157,11 @@
   .statspanel .stlbl{text-align:center;font-size:11px;color:var(--mut);font-weight:700;margin:6px 0 3px}
   .statspanel .strow{display:flex;align-items:center;gap:8px;direction:ltr}
   .statspanel .stv{font-size:12.5px;font-weight:800;color:var(--txt);min-width:34px;text-align:center}
+  .statspanel .stv.vh{color:var(--accent)}
+  .statspanel .stv.va{color:#38bdf8}
   .statspanel .stbarwrap{flex:1;height:6px;background:var(--line);border-radius:4px;overflow:hidden;direction:ltr;display:flex}
   .statspanel .stbar.sth{background:var(--accent);height:100%}
+  .statspanel .stbar.sta{background:#38bdf8;height:100%}
   .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--bg2);color:var(--mut);border:1px solid var(--line)}
   .tag.g{color:var(--accent)}.tag.k{color:var(--accent2);border-color:rgba(255,61,127,.3)}.tag.f{color:var(--gold);border-color:rgba(255,203,69,.4)}
   .leg{color:var(--mut);font-size:12.5px;margin:0 4px 16px;display:flex;align-items:center;gap:8px}
@@ -804,11 +807,11 @@ function render(){
         const hn=toNum(hv),an=toNum(av),tot=hn+an;
         realCount++;
         const hpct=tot>0?Math.round(hn/tot*100):50;
-        rows+=`<div class="stlbl">${LB[k]}</div><div class="strow"><span class="stv">${hv}</span><div class="stbarwrap"><span class="stbar sth" style="width:${hpct}%"></span></div><span class="stv">${av}</span></div>`;
+        rows+=`<div class="stlbl">${LB[k]}</div><div class="strow"><span class="stv vh">${hv}</span><div class="stbarwrap"><span class="stbar sth" style="width:${hpct}%"></span><span class="stbar sta" style="width:${100-hpct}%"></span></div><span class="stv va">${av}</span></div>`;
       });
       // اعرض لو فيه إحصائيتان حقيقيتان على الأقل (الاستحواذ والتسديدات مثلاً)
       if(rows && realCount>=2){
-        const head=`<div class="sthead"><span class="sthteam">${m.t1[1]||''} ${m.t1[0]}</span><span class="sthteam">${m.t2[0]} ${m.t2[1]||''}</span></div>`;
+        const head=`<div class="sthead"><span class="sthteam" style="color:var(--accent)">${m.t1[1]||''} ${m.t1[0]}</span><span class="sthteam" style="color:#38bdf8">${m.t2[0]} ${m.t2[1]||''}</span></div>`;
         statsHtml=`<div class="statspanel" style="display:none">${head}${rows}</div>`;
         statsBtn=`<button class="statsbtn" onclick="const p=this.parentElement.querySelector('.statspanel');const o=p.style.display==='none';p.style.display=o?'block':'none';this.textContent=o?'▲ إخفاء الإحصائيات':'📊 إحصائيات المباراة'">📊 إحصائيات المباراة</button>`;
       }
