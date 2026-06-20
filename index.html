@@ -515,10 +515,11 @@ function applyGoalsCache(){
     if(saved.finished)m.finished=true;
     if(saved.goals&&saved.goals.length&&!(m.goals&&m.goals.length))m.goals=saved.goals;
     if(saved.stats&&Object.keys(saved.stats).length&&!(m.stats&&Object.keys(m.stats).length))m.stats=saved.stats;
+    if(saved.fixtureId&&!m.fixtureId)m.fixtureId=saved.fixtureId;
   });
 }
 function saveMatchGoals(m){
-  const key=matchCacheKey(m); if(!key||(!m.score&&!(m.goals&&m.goals.length)))return;
+  const key=matchCacheKey(m); if(!key||(!m.score&&!(m.goals&&m.goals.length)&&!m.fixtureId))return;
   const cache=readGoalsCache();
   const prev=cache[key]||{};
   cache[key]={
@@ -526,6 +527,7 @@ function saveMatchGoals(m){
     finished:!!m.finished||!!prev.finished,
     goals:(m.goals&&m.goals.length)?m.goals:(prev.goals||[]),
     stats:(m.stats&&Object.keys(m.stats).length)?m.stats:(prev.stats||null),
+    fixtureId:m.fixtureId||prev.fixtureId||null,
     savedAt:Date.now()
   };
   writeGoalsCache(cache);
@@ -891,6 +893,14 @@ function altKit(kit){
   return lum>140 ? {bg:'#16213e',fg:'#fff',border:'rgba(255,255,255,.7)'} : {bg:'#f0f0f0',fg:'#111',border:'rgba(0,0,0,.3)'};
 }
 function arTeam(en){const k=NAME[norm(en)];return k?k[0]:en;}
+const LINEUP_CACHE_KEY="wc26-lineup-cache-v1";
+function loadLineupCache(){try{return JSON.parse(localStorage.getItem(LINEUP_CACHE_KEY)||"{}");}catch(e){return {};}}
+function saveLineupToCache(id,data){
+  try{const c=loadLineupCache();c[id]={data,ts:Date.now()};
+    // احتفظ بآخر 60 تشكيلة فقط حتى لا يمتلئ التخزين
+    const keys=Object.keys(c);if(keys.length>60){keys.sort((a,b)=>c[a].ts-c[b].ts).slice(0,keys.length-60).forEach(k=>delete c[k]);}
+    localStorage.setItem(LINEUP_CACHE_KEY,JSON.stringify(c));}catch(e){}
+}
 async function openLineup(btn,fixtureId,flag1,flag2){
   if(btn){btn.textContent='⏳ يحمّل…';btn.disabled=true;}
   let data=null;
@@ -899,6 +909,14 @@ async function openLineup(btn,fixtureId,flag1,flag2){
     if(r.ok)data=await r.json();
   }catch(e){}
   if(btn){btn.textContent='👕 التشكيلة';btn.disabled=false;}
+  // لو الجلب ناجح وفيه فريقان، احفظه دائماً. وإلا، استرجع المحفوظ سابقاً (لا يختفي أبداً)
+  const valid = data && data.teams && data.teams.length>=2;
+  if(valid){
+    saveLineupToCache(fixtureId,data);
+  }else{
+    const cached=loadLineupCache()[fixtureId];
+    if(cached && cached.data){ data=cached.data; }
+  }
   if(!data||!data.teams||data.teams.length<2){
     showLineupOverlay(`<div style="padding:30px;text-align:center;color:var(--mut)">التشكيلة غير متوفرة بعد لهذه المباراة.<br>تظهر عادةً قبل المباراة بساعة تقريباً.</div>`);
     return;
