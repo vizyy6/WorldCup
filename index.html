@@ -249,7 +249,7 @@
     التوقيت بتوقيت السعودية (الرياض)، ومباريات المنتخب السعودي 🇸🇦 مميّزة بالذهبي.
   </div>
   <div class="ctrlbar">
-    <button id="todayBtn" class="hidefin" onclick="toggleTodayOnly()">📅 اليوم فقط</button>
+    <button id="todayBtn" class="hidefin" onclick="toggleTodayOnly()">📅 اضغط لإظهار كل المباريات</button>
     <button id="hideFinBtn" class="hidefin" onclick="toggleHideFinished()">اضغط لإظهار المباريات المنتهية</button>
   </div>
   <div id="list"></div>
@@ -731,7 +731,7 @@ function toggleTodayOnly(){
   const b=document.getElementById('todayBtn');
   if(b){
     b.className='hidefin'+(todayOnly?'':' off');
-    b.textContent=todayOnly?'📅 اليوم فقط':'📅 عرض كل المباريات';
+    b.textContent=todayOnly?'📅 اضغط لإظهار كل المباريات':'📅 اضغط لعرض مباريات اليوم فقط';
   }
   render();
 }
