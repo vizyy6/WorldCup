@@ -247,7 +247,7 @@
   <div class="note">
     التوقيت بتوقيت السعودية (الرياض)، ومباريات المنتخب السعودي 🇸🇦 مميّزة بالذهبي.
   </div>
-  <button id="hideFinBtn" class="hidefin" onclick="toggleHideFinished()">اضغط لإخفاء المباريات المنتهية</button>
+  <button id="hideFinBtn" class="hidefin off" onclick="toggleHideFinished()">اضغط لإظهار المباريات المنتهية</button>
   <div id="list"></div>
   <div class="empty" id="empty" style="display:none">ما فيه مباريات في هذا التصنيف.</div>
 </div>
@@ -619,7 +619,7 @@ function showExport(){
 }
 
 const list=document.getElementById('list'),empty=document.getElementById('empty');
-let DATA=fromFallback(), curFilter='all', hideFinished=false;
+let DATA=fromFallback(), curFilter='all', hideFinished=true;
 applyPrintedResults();
 applyGoalsCache();
 const ST={groups:["g","المجموعة"],r32:["k","دور 32"],r16:["k",""],qf:["k","ربع"],sf:["k","نصف"],final:["f","النهائي"]};
@@ -720,6 +720,17 @@ function toggleHideFinished(){
     b.textContent=hideFinished?'اضغط لإظهار المباريات المنتهية':'اضغط لإخفاء المباريات المنتهية';
   }
   render();
+}
+let _scrolledToday=false;
+function scrollToToday(){
+  if(_scrolledToday)return;
+  if(curFilter!=='all'&&curFilter!=='ksa')return;
+  const el=document.querySelector('.dayhead.today');
+  if(el){
+    _scrolledToday=true;
+    const y=el.getBoundingClientRect().top+window.pageYOffset-90;
+    window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+  }
 }
 function render(){
   list.innerHTML='';
@@ -1001,7 +1012,8 @@ document.getElementById('refreshBtn').addEventListener('click',async()=>{
 });
 
 render();        // اعرض الاحتياطي فوراً
-loadLive().then(loadScores);   // ثم حدّث من المصدر + النتائج اللحظية
+scrollToToday(); // افتح على مباريات اليوم
+loadLive().then(loadScores).then(()=>scrollToToday());   // ثم حدّث من المصدر + النتائج اللحظية
 
 // استطلاع تكيفي: كل ٢٠ ثانية وقت مباراة مباشرة، كل ٣ دقائق خارجها
 function shouldBeLive(m){
