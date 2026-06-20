@@ -183,7 +183,8 @@
   .grptbl .flag{font-size:18px;width:22px;text-align:center;line-height:1}
   .note{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 20px;color:var(--mut);font-size:13.5px}
   .note b{color:var(--txt)}
-  .hidefin{display:inline-block;margin:0 0 16px;padding:7px 14px;border-radius:20px;cursor:pointer;
+  .ctrlbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+  .hidefin{display:inline-block;margin:0;padding:7px 14px;border-radius:20px;cursor:pointer;
     font-family:'Thmanyah';font-weight:700;font-size:12.5px;transition:.2s;
     background:linear-gradient(120deg,var(--accent),#00b389);color:#04221a;border:1px solid transparent}
   .hidefin.off{background:transparent;color:var(--mut);border:1px solid var(--line)}
@@ -247,7 +248,10 @@
   <div class="note">
     التوقيت بتوقيت السعودية (الرياض)، ومباريات المنتخب السعودي 🇸🇦 مميّزة بالذهبي.
   </div>
-  <button id="hideFinBtn" class="hidefin off" onclick="toggleHideFinished()">اضغط لإظهار المباريات المنتهية</button>
+  <div class="ctrlbar">
+    <button id="todayBtn" class="hidefin" onclick="toggleTodayOnly()">📅 اليوم فقط</button>
+    <button id="hideFinBtn" class="hidefin" onclick="toggleHideFinished()">اضغط لإظهار المباريات المنتهية</button>
+  </div>
   <div id="list"></div>
   <div class="empty" id="empty" style="display:none">ما فيه مباريات في هذا التصنيف.</div>
 </div>
@@ -619,7 +623,7 @@ function showExport(){
 }
 
 const list=document.getElementById('list'),empty=document.getElementById('empty');
-let DATA=fromFallback(), curFilter='all', hideFinished=true;
+let DATA=fromFallback(), curFilter='all', hideFinished=true, todayOnly=true;
 applyPrintedResults();
 applyGoalsCache();
 const ST={groups:["g","المجموعة"],r32:["k","دور 32"],r16:["k",""],qf:["k","ربع"],sf:["k","نصف"],final:["f","النهائي"]};
@@ -716,30 +720,34 @@ function toggleHideFinished(){
   hideFinished=!hideFinished;
   const b=document.getElementById('hideFinBtn');
   if(b){
-    b.className='hidefin'+(hideFinished?' off':'');
+    // إظهار = أخضر، إخفاء = شفاف
+    b.className='hidefin'+(hideFinished?'':' off');
     b.textContent=hideFinished?'اضغط لإظهار المباريات المنتهية':'اضغط لإخفاء المباريات المنتهية';
   }
   render();
 }
-let _scrolledToday=false;
-function scrollToToday(){
-  if(_scrolledToday)return;
-  if(curFilter!=='all'&&curFilter!=='ksa')return;
-  const el=document.querySelector('.dayhead.today');
-  if(el){
-    _scrolledToday=true;
-    const y=el.getBoundingClientRect().top+window.pageYOffset-90;
-    window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+function toggleTodayOnly(){
+  todayOnly=!todayOnly;
+  const b=document.getElementById('todayBtn');
+  if(b){
+    b.className='hidefin'+(todayOnly?'':' off');
+    b.textContent=todayOnly?'📅 اليوم فقط':'📅 عرض كل المباريات';
   }
+  render();
 }
 function render(){
   list.innerHTML='';
   const hb=document.getElementById('hideFinBtn');
-  if(hb)hb.style.display=(curFilter==='groups'||curFilter==='scorers'||curFilter==='bracket')?'none':'inline-block';
+  const tb=document.getElementById('todayBtn');
+  const listView=!(curFilter==='groups'||curFilter==='scorers'||curFilter==='bracket');
+  if(hb)hb.style.display=listView?'inline-block':'none';
+  if(tb)tb.style.display=(listView&&curFilter==='all')?'inline-block':'none';
   if(curFilter==='groups'){renderStandings();return;}
   if(curFilter==='scorers'){empty.style.display='none';renderScorers();return;}
   if(curFilter==='bracket'){empty.style.display='none';renderBracket();return;}
+  const _today=(()=>{const n=new Date();const u=new Date(n.getTime()+(n.getTimezoneOffset()+180)*60000);return u.getDate()+" "+MON[u.getMonth()];})();
   const rows=DATA.filter(m=>{
+    if(todayOnly && curFilter==='all' && m.day!==_today)return false;
     if(hideFinished){
       const isFin = m.finished || (m.score && !m.liveNow && !shouldBeLive(m));
       if(isFin)return false;
@@ -1012,8 +1020,7 @@ document.getElementById('refreshBtn').addEventListener('click',async()=>{
 });
 
 render();        // اعرض الاحتياطي فوراً
-scrollToToday(); // افتح على مباريات اليوم
-loadLive().then(loadScores).then(()=>scrollToToday());   // ثم حدّث من المصدر + النتائج اللحظية
+loadLive().then(loadScores);   // ثم حدّث من المصدر + النتائج اللحظية
 
 // استطلاع تكيفي: كل ٢٠ ثانية وقت مباراة مباشرة، كل ٣ دقائق خارجها
 function shouldBeLive(m){
