@@ -58,7 +58,8 @@
     border-radius:30px;font-family:'Thmanyah';font-weight:700;font-size:14px;cursor:pointer;transition:.2s;white-space:nowrap}
   .chip:hover{color:var(--txt)}
   .chip.on{background:linear-gradient(120deg,var(--accent),#00b389);color:#04221a;border-color:transparent}
-  .chip.ksaC.on{background:linear-gradient(120deg,var(--gold),#ffb000);color:#3a2600}
+  .chip.ksaC{border-color:var(--gold);color:var(--gold)}
+  .chip.ksaC.on{background:linear-gradient(120deg,var(--gold),#ffb000);color:#3a2600;border-color:var(--gold)}
   .daygroup{margin-bottom:26px}
   .dayhead{display:flex;align-items:baseline;gap:10px;padding:6px 4px 12px;border-bottom:1px solid var(--line);margin-bottom:14px}
   .dayhead.today{border-bottom-color:var(--accent)}
@@ -71,7 +72,7 @@
     display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;transition:.18s;position:relative;overflow:hidden}
   .match:hover{background:var(--card-hi);transform:translateY(-2px)}
   .match.ksaM{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset,0 6px 24px rgba(255,203,69,.10)}
-  .match.ksaM::before{content:"🇸🇦 السعودية";position:absolute;top:0;left:0;background:var(--gold);color:#3a2600;
+  .match.ksaM::before{content:attr(data-arab);position:absolute;top:0;left:0;background:var(--gold);color:#3a2600;
     font-size:11px;font-weight:800;padding:3px 10px;border-bottom-right-radius:10px}
   .teams{display:flex;flex-direction:column;gap:7px;padding-top:2px}.match.ksaM .teams{padding-top:20px}.match.ksaM .meta{padding-top:20px}
   .team{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px}
@@ -232,7 +233,7 @@
 <div class="filters">
   <div class="frow" id="frow">
     <button class="chip on" data-f="all">الكل</button>
-    <button class="chip ksaC" data-f="ksa">🇸🇦 السعودية</button>
+    <button class="chip ksaC" data-f="ksa">المنتخبات العربية</button>
     <button class="chip" data-f="groups">المجموعات</button>
     <button class="chip" data-f="scorers">⚽ الهدافون</button>
     <button class="chip" data-f="bracket">🏆 الشجرة</button>
@@ -246,7 +247,7 @@
 
 <div class="wrap">
   <div class="note">
-    التوقيت بتوقيت السعودية (الرياض)، ومباريات المنتخب السعودي 🇸🇦 مميّزة بالذهبي.
+    التوقيت بتوقيت السعودية (الرياض)، ومباريات المنتخبات العربية 🌍 مميّزة بالذهبي.
   </div>
   <div class="ctrlbar">
     <button id="todayBtn" class="hidefin" onclick="toggleTodayOnly()">📅 اضغط لإظهار كل المباريات</button>
@@ -288,6 +289,10 @@ const STAD={ // اسم الملعب حسب المدينة (بالعربي)
  "أتلانتا":"استاد مرسيدس-بنز","ميامي":"استاد هارد روك","هيوستن":"استاد NRG","دالاس":"استاد AT&T","كانساس سيتي":"استاد آرو هيد"};
 
 function norm(s){return (s||"").toString().trim().toLowerCase().replace(/\s+/g,' ');}
+// المنتخبات العربية الثمانية في مونديال 2026 (بصيغة t1raw/t2raw المُطبّعة)
+const ARAB_TEAMS=new Set(['saudi arabia','qatar','jordan','iraq','morocco','tunisia','algeria','egypt']);
+function isArab(raw){return ARAB_TEAMS.has(norm(raw));}
+function matchHasArab(m){return isArab(m.t1raw)||isArab(m.t2raw);}
 function arName(en){const k=norm(en);if(NAME[k])return NAME[k];
   // ترجمة خفيفة لعناصر الأدوار الإقصائية
   let t=en.replace(/Winner Match/gi,'فائز م').replace(/Winner/gi,'فائز').replace(/Runners?-?up/gi,'وصيف')
@@ -659,7 +664,7 @@ function renderStandings(){
   const grid=document.createElement('div');grid.className='grpgrid';
   keys.forEach(g=>{
     let rows='';
-    S[g].forEach((t,i)=>{const gd=t.gf-t.ga,gds=(gd>0?'+':'')+gd,ksa=t.key==='saudi arabia';
+    S[g].forEach((t,i)=>{const gd=t.gf-t.ga,gds=(gd>0?'+':'')+gd,ksa=isArab(t.key);
       rows+=`<tr class="${i<2?'adv':''} ${ksa?'ksaRow':''}"><td class="rk">${i+1}</td><td class="tm"><span class="flag">${t.flag}</span>${t.name}</td><td>${t.p}</td><td>${gds}</td><td class="pts">${t.pts}</td></tr>`;});
     const card=document.createElement('div');card.className='grpcard';
     card.innerHTML=`<div class="grphd">المجموعة ${g}</div><table class="grptbl"><thead><tr><th></th><th>المنتخب</th><th>لعب</th><th>+/-</th><th>نقاط</th></tr></thead><tbody>${rows}</tbody></table>`;
@@ -677,7 +682,7 @@ function renderScorers(){
   let rows='';
   TOPS.forEach((p,i)=>{
     const nm=NAME[norm(p.team)],flag=nm?nm[1]:'\ud83c\udff3\ufe0f',tname=nm?nm[0]:p.team;
-    const ksa=norm(p.team)==='saudi arabia';
+    const ksa=isArab(p.team);
     rows+=`<tr class="${i===0?'adv':''} ${ksa?'ksaRow':''}"><td class="rk">${i+1}</td>
       <td class="tm"><span class="flag">${flag}</span><span>${p.name}<div class="tsub">${tname}</div></span></td>
       <td>${p.assists||0}</td><td class="pts">${p.goals}</td></tr>`;
@@ -707,7 +712,7 @@ function renderBracket(){
       const status = (m.finished||(sc&&!m.liveNow)) ? `<span class="bft">انتهت</span>`
         : m.liveNow ? `<span class="blive">\u25cf مباشر</span>`
         : `${m.day} \u00b7 ${m.time} ${m.ap}`;
-      html+=`<div class="bm ${(m.t1raw==='saudi arabia'||m.t2raw==='saudi arabia')?'bksa':''}">
+      html+=`<div class="bm ${matchHasArab(m)?'bksa':''}">
         ${m.num?`<div class="bnum">#${m.num}${m.grp==='م. الثالث'?' \u00b7 م. الثالث':''}</div>`:(m.grp==='م. الثالث'?`<div class="bnum">م. الثالث</div>`:'')}
         ${inner}<div class="bmeta">${status}</div></div>`;
     });
@@ -755,7 +760,7 @@ function render(){
       if(isFin)return false;
     }
     if(curFilter==='all')return true;
-    if(curFilter==='ksa')return m.t1raw==='saudi arabia'||m.t2raw==='saudi arabia';
+    if(curFilter==='ksa')return matchHasArab(m);
     return m.stage===curFilter;
   });
   if(!rows.length){empty.style.display='block';return}
@@ -770,7 +775,13 @@ function render(){
       dg.innerHTML=`<div class="dayhead${isToday?' today':''}"><span class="dnum">${p[0]}</span><span class="dwords">${p[1]}</span><span class="ddow">${m.dow}</span>${isToday?'<span class="todaybadge">اليوم</span>':''}</div>`;
       list.appendChild(dg);lastDay=m.day;
     }
-    const isKsa=(m.t1raw==='saudi arabia'||m.t2raw==='saudi arabia');
+    const isKsa=matchHasArab(m);
+    // اسم وعلم المنتخب العربي في المباراة (للشارة)
+    let arabBadge='';
+    if(isKsa){
+      const ar = isArab(m.t1raw)?m.t1:(isArab(m.t2raw)?m.t2:null);
+      if(ar) arabBadge=`${ar[1]||''} ${ar[0]}`;
+    }
     const st=ST[m.stage]||["k",""];
     const label=m.stage==='groups'?`${st[1]} ${m.grp}`:(m.grp||'النهائي');
     const sc=m.score;
@@ -790,6 +801,7 @@ function render(){
       teamsHtml=`<div class="team" style="font-size:15px">${parts[0]}</div><div class="vs">×</div><div class="team" style="font-size:15px">${parts[1]||''}</div>`;
     }
     const el=document.createElement('div');el.className='match'+(isKsa?' ksaM':'');
+    if(isKsa&&arabBadge){el.setAttribute('data-arab',arabBadge);}
     const stad=STAD[m.city]||'';
     const status = statusEarly;
     // الدقيقة من API-Football مباشرة (m.elapsed) — لا تقدير محلي حتى لا تنحرف عن الواقع
