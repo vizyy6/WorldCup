@@ -488,7 +488,7 @@ function canonKey(a,b){
   const c=x=>NAME[norm(x)]?NAME[norm(x)][0]:norm(x);
   return [c(a),c(b)].sort().join('|');
 }
-const GOALS_CACHE_KEY="wc26-goals-cache-v1";
+const GOALS_CACHE_KEY="wc26-goals-cache-v2";
 function matchCacheKey(m){
   if(!m||!m.t1raw||!m.t2raw)return null;
   return canonKey(m.t1raw,m.t2raw)+"@"+(m.epoch||m.day+"-"+m.time);
@@ -882,10 +882,10 @@ function render(){
       };
       goalsHtml=`<div class="goals">${col('h',m.t1||['','⚽'])}${col('a',m.t2||['','⚽'])}</div>`;
     }
-    // بطاقات المباراة (تظهر للمباريات المباشرة والمنتهية)
+    // بطاقات المباراة (تظهر فقط لو فيه بطاقة واحدة على الأقل)
     let cardsHtml='';
-    if((status==='live'||status==='finished') && m.t1 && m.t2){
-      const cards=m.cards||[];
+    if((status==='live'||status==='finished') && m.t1 && m.t2 && m.cards && m.cards.length){
+      const cards=m.cards;
       const flagOf=s=>s==='h'?(m.t1[1]||''):(m.t2[1]||'');
       const colC=(color)=>{
         const list=cards.filter(c=>c.color===color).sort((a,b)=>(a.min+a.plus/10)-(b.min+b.plus/10));
