@@ -201,6 +201,13 @@
   .grptbl .flag{font-size:18px;width:22px;text-align:center;line-height:1}
   .note{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 20px;color:var(--mut);font-size:13.5px}
   .note b{color:var(--txt)}
+  .searchbar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 14px;margin:0 0 12px;transition:.2s}
+  .searchbar:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,224,164,.12)}
+  .searchbar .searchic{font-size:15px;opacity:.7;flex:0 0 auto}
+  .searchbar input{flex:1;background:none;border:none;outline:none;color:var(--txt);font-family:'Thmanyah';font-size:14.5px;font-weight:500;min-width:0;text-align:center}
+  .searchbar input::placeholder{color:var(--mut);font-weight:500}
+  .searchclear{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:none;background:var(--line);color:var(--txt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;padding:0;transition:.15s}
+  .searchclear:hover{background:var(--accent2);color:#fff}
   .ctrlbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
   .hidefin{display:inline-block;margin:0;padding:7px 14px;border-radius:20px;cursor:pointer;
     font-family:'Thmanyah';font-weight:700;font-size:12.5px;transition:.2s;
@@ -265,6 +272,11 @@
 <div class="wrap">
   <div class="note">
     التوقيت بتوقيت السعودية (الرياض)، ومباريات المنتخبات العربية 🌍 مميّزة بالذهبي.
+  </div>
+  <div class="searchbar">
+    <span class="searchic">🔍</span>
+    <input type="text" id="searchInput" placeholder="ابحث" oninput="onSearch(this.value)" autocomplete="off">
+    <button id="searchClear" class="searchclear" onclick="clearSearch()" style="display:none" aria-label="مسح">✕</button>
   </div>
   <div class="ctrlbar">
     <button id="todayBtn" class="hidefin" onclick="toggleTodayOnly()">📅 اضغط لإظهار كل المباريات</button>
@@ -655,7 +667,7 @@ function showExport(){
 }
 
 const list=document.getElementById('list'),empty=document.getElementById('empty');
-let DATA=fromFallback(), curFilter='all', hideFinished=true, todayOnly=true;
+let DATA=fromFallback(), curFilter='all', hideFinished=true, todayOnly=true, searchQuery='';
 applyPrintedResults();
 applyGoalsCache();
 const ST={groups:["g","المجموعة"],r32:["k","دور 32"],r16:["k",""],qf:["k","ربع"],sf:["k","نصف"],final:["f","النهائي"]};
@@ -767,18 +779,50 @@ function toggleTodayOnly(){
   }
   render();
 }
+function matchHasQuery(m,q){
+  if(!q)return true;
+  q=norm(q);
+  // اجمع كل الأسماء الممكنة: الإنجليزي المُطبّع + العربي لكل فريق
+  const parts=[];
+  if(m.t1raw)parts.push(norm(m.t1raw));
+  if(m.t2raw)parts.push(norm(m.t2raw));
+  if(m.t1&&m.t1[0])parts.push(norm(m.t1[0]));
+  if(m.t2&&m.t2[0])parts.push(norm(m.t2[0]));
+  // للأدوار الإقصائية بدون فرق محددة، ابحث في النص المعروض
+  if(!m.t1&&m.t2&&m.t2[0])parts.push(norm(m.t2[0]));
+  return parts.some(p=>p.includes(q));
+}
+function onSearch(v){
+  searchQuery=v||'';
+  const c=document.getElementById('searchClear');
+  if(c)c.style.display=searchQuery?'flex':'none';
+  render();
+}
+function clearSearch(){
+  searchQuery='';
+  const i=document.getElementById('searchInput');if(i)i.value='';
+  const c=document.getElementById('searchClear');if(c)c.style.display='none';
+  render();
+}
 function render(){
   list.innerHTML='';
   const hb=document.getElementById('hideFinBtn');
   const tb=document.getElementById('todayBtn');
   const listView=!(curFilter==='groups'||curFilter==='scorers'||curFilter==='bracket');
-  if(hb)hb.style.display=listView?'inline-block':'none';
-  if(tb)tb.style.display=(listView&&curFilter==='all')?'inline-block':'none';
+  if(hb)hb.style.display=(listView&&!searchQuery)?'inline-block':'none';
+  if(tb)tb.style.display=(listView&&curFilter==='all'&&!searchQuery)?'inline-block':'none';
   if(curFilter==='groups'){renderStandings();return;}
   if(curFilter==='scorers'){empty.style.display='none';renderScorers();return;}
   if(curFilter==='bracket'){empty.style.display='none';renderBracket();return;}
   const _today=(()=>{const n=new Date();const u=new Date(n.getTime()+(n.getTimezoneOffset()+180)*60000);return u.getDate()+" "+MON[u.getMonth()];})();
   const rows=DATA.filter(m=>{
+    if(searchQuery){
+      // عند البحث: ابحث في كل المباريات (تجاهل فلتر اليوم)، لكن طابق التصنيف الحالي
+      if(!matchHasQuery(m,searchQuery))return false;
+      if(curFilter==='ksa')return matchHasArab(m);
+      if(curFilter!=='all'&&curFilter!=='ksa')return m.stage===curFilter;
+      return true;
+    }
     if(todayOnly && curFilter==='all' && m.day!==_today)return false;
     if(hideFinished){
       const isFin = m.finished || (m.score && !m.liveNow && !shouldBeLive(m));
@@ -788,7 +832,7 @@ function render(){
     if(curFilter==='ksa')return matchHasArab(m);
     return m.stage===curFilter;
   });
-  if(!rows.length){empty.style.display='block';return}
+  if(!rows.length){empty.textContent=searchQuery?`ما فيه نتائج لـ "${searchQuery}".`:'ما فيه مباريات في هذا التصنيف.';empty.style.display='block';return}
   empty.style.display='none';
   let lastDay=null,dg=null;
   const todayStr=(()=>{const n=new Date();const u=new Date(n.getTime()+(n.getTimezoneOffset()+180)*60000);return u.getDate()+" "+MON[u.getMonth()];})();
