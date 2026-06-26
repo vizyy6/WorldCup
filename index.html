@@ -71,8 +71,23 @@
   .match{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:10px;
     display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;transition:.18s;position:relative;overflow:hidden}
   .match:hover{background:var(--card-hi);transform:translateY(-2px)}
-  .shareic{position:absolute;top:8px;left:8px;z-index:3;width:26px;height:26px;display:flex;align-items:center;justify-content:center;
-    background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:8px;color:var(--mut);cursor:pointer;padding:0;transition:.15s}
+  .shareic{position:absolute;top:8px;left:8px;z-index:5;width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+    background:var(--card);border:1px solid var(--line);border-radius:8px;color:var(--mut);cursor:pointer;padding:0;transition:.15s}
+  .match:hover .shareic{background:var(--card-hi)}
+  /* بطاقات المباراة */
+  .cardszone{grid-column:1/-1;display:flex;justify-content:center;align-items:flex-start;gap:0;margin:10px 0 2px;padding-top:10px;border-top:1px solid var(--line)}
+  .cardcol{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1;max-width:160px}
+  .ccard{position:relative;width:28px;height:39px;border-radius:5px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.45);transform:rotate(-7deg)}
+  .ccard.yellow{background:linear-gradient(150deg,#ffd23f,#f5b800)}
+  .ccard.red{background:linear-gradient(150deg,#ff4757,#e01e37);transform:rotate(7deg)}
+  .ccard .cnum{font-family:'Bebas Neue';font-size:20px;font-weight:700;color:rgba(0,0,0,.78);line-height:1}
+  .ccard.red .cnum{color:rgba(255,255,255,.95)}
+  .cneon{width:2px;align-self:stretch;margin:2px 14px;border-radius:2px;background:var(--accent);box-shadow:0 0 6px rgba(0,224,164,.6)}
+  .cnames{display:flex;flex-direction:column;gap:5px;width:100%;margin-top:2px;min-width:0}
+  .cpname{display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;color:var(--txt);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:3px 6px;min-width:0}
+  .cpname>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .cpname .cfl{flex:0 0 auto;font-size:12px}
+  .cpname .cmn{flex:0 0 auto;color:var(--mut);font-size:10px;font-family:'Bebas Neue'}
   .shareic:hover{color:var(--accent);border-color:var(--accent);background:rgba(0,224,164,.08)}
   .shareic.copied{color:var(--accent);border-color:var(--accent)}
   .shareic.copied svg{display:none}
@@ -86,14 +101,19 @@
   .team.win .sc{color:var(--gold)}
   @media (max-width:520px){
     .match{grid-template-columns:1fr;gap:8px}
+    .match .teams{padding-top:6px;padding-left:34px}
+    .match.ksaM .teams{padding-top:6px}
     .meta{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px 10px;min-width:0;border-top:1px solid var(--line);padding-top:8px}
     .match.ksaM .meta{padding-top:8px}
     .time{font-size:24px}
     .stad{order:2}.city{order:3}.tag{order:4}
+    .ccard{width:26px;height:36px}.ccard .cnum{font-size:18px}
+    .cardcol{max-width:46%}
+    .cneon{margin:2px 10px}
   }
   .flag{font-size:22px;line-height:1;width:26px;text-align:center;flex:0 0 auto}
   .vs{color:var(--mut);font-size:12px;font-weight:500;padding-right:35px}
-  .meta{text-align:left;direction:ltr;display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:108px}
+  .meta{text-align:left;direction:ltr;display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:108px;padding-top:6px}
   .time{font-family:'Bebas Neue';font-size:30px;color:var(--txt);line-height:.9;letter-spacing:1px}
   .ampm{font-size:13px;color:var(--accent);font-family:'Thmanyah';font-weight:700}
   .ft{font-size:11px;font-weight:800;color:var(--accent2);background:rgba(255,61,127,.12);border:1px solid rgba(255,61,127,.3);padding:2px 8px;border-radius:6px}
@@ -525,6 +545,7 @@ function applyGoalsCache(){
     if(saved.score&&!m.score)m.score=saved.score;
     if(saved.finished)m.finished=true;
     if(saved.goals&&saved.goals.length&&!(m.goals&&m.goals.length))m.goals=saved.goals;
+    if(saved.cards&&saved.cards.length&&!(m.cards&&m.cards.length))m.cards=saved.cards;
     if(saved.stats&&Object.keys(saved.stats).length&&!(m.stats&&Object.keys(m.stats).length))m.stats=saved.stats;
     if(saved.fixtureId&&!m.fixtureId)m.fixtureId=saved.fixtureId;
   });
@@ -537,6 +558,7 @@ function saveMatchGoals(m){
     score:m.score||prev.score||null,
     finished:!!m.finished||!!prev.finished,
     goals:(m.goals&&m.goals.length)?m.goals:(prev.goals||[]),
+    cards:(m.cards&&m.cards.length)?m.cards:(prev.cards||[]),
     stats:(m.stats&&Object.keys(m.stats).length)?m.stats:(prev.stats||null),
     fixtureId:m.fixtureId||prev.fixtureId||null,
     savedAt:Date.now()
@@ -557,6 +579,7 @@ function preserveMatchState(prevData){
     if(old.liveNow)m.liveNow=true;
     // ملاحظة: لا نحتفظ بالدقيقة القديمة (elapsed) — تُجلب طازجة من الووركر فقط حتى لا تتجمّد
     if(old.goals&&old.goals.length&&!(m.goals&&m.goals.length))m.goals=old.goals;
+    if(old.cards&&old.cards.length&&!(m.cards&&m.cards.length))m.cards=old.cards;
   });
 }
 function mergeScores(j){
@@ -583,6 +606,11 @@ function mergeScores(j){
     })).sort((x,y)=>(x.min+x.plus/10)-(y.min+y.plus/10));
     // لا تمسح المسجّلين المعروضين برد ناقص: تجاهل القائمة الفاضية لو عندنا قائمة فيها محتوى
     if(ng.length || !(m.goals&&m.goals.length)) m.goals=ng;
+    const nc=(best.cards||[]).map(c=>({
+      side: flip ? (c.side==='h'?'a':'h') : c.side,
+      player:c.player, min:c.min, plus:c.plus, color:c.color
+    })).sort((x,y)=>(x.min+x.plus/10)-(y.min+y.plus/10));
+    if(nc.length || !(m.cards&&m.cards.length)) m.cards=nc;
     if(best.stats){
       if(flip){
         const fl={};Object.keys(best.stats).forEach(k=>{fl[k]={h:best.stats[k].a,a:best.stats[k].h};});
@@ -854,6 +882,18 @@ function render(){
       };
       goalsHtml=`<div class="goals">${col('h',m.t1||['','⚽'])}${col('a',m.t2||['','⚽'])}</div>`;
     }
+    // بطاقات المباراة (تظهر للمباريات المباشرة والمنتهية)
+    let cardsHtml='';
+    if((status==='live'||status==='finished') && m.t1 && m.t2){
+      const cards=m.cards||[];
+      const flagOf=s=>s==='h'?(m.t1[1]||''):(m.t2[1]||'');
+      const colC=(color)=>{
+        const list=cards.filter(c=>c.color===color).sort((a,b)=>(a.min+a.plus/10)-(b.min+b.plus/10));
+        const names=list.map(c=>`<div class="cpname"><span class="cfl">${flagOf(c.side)}</span><span>${c.player||''}</span><span class="cmn">${c.min}${c.plus?`+${c.plus}`:''}'</span></div>`).join('');
+        return `<div class="cardcol"><div class="ccard ${color}"><span class="cnum">${list.length}</span></div><div class="cnames">${names}</div></div>`;
+      };
+      cardsHtml=`<div class="cardszone">${colC('yellow')}<div class="cneon"></div>${colC('red')}</div>`;
+    }
     let statsHtml='',statsBtn='';
     if(m.stats && Object.keys(m.stats).length && m.t1 && m.t2){
       const LB={pos:'الاستحواذ',shots:'التسديدات',sot:'على المرمى',corners:'الركنيات',fouls:'الأخطاء',yc:'بطاقات صفراء',rc:'بطاقات حمراء',off:'تسلل'};
@@ -888,6 +928,7 @@ function render(){
       <div class="city">${m.city}</div>
       <div class="tag ${st[0]}">${label}</div></div>
       ${goalsHtml}
+      ${cardsHtml}
       ${statsBtn}
       ${statsHtml}
       ${lineupBtn}
