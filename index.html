@@ -156,12 +156,12 @@
   .pitch .box6.top{top:0;border-top:none}.pitch .box6.bot{bottom:0;border-bottom:none}
   .pitch .goal{position:absolute;left:50%;transform:translateX(-50%);width:14%;height:1.5%;background:rgba(255,255,255,.5)}
   .pitch .goal.top{top:0}.pitch .goal.bot{bottom:0}
-  .pl{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;width:64px}
+  .pl{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;width:74px;z-index:2}
   .pl .shirt{position:relative;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
     font-family:'Bebas Neue';font-size:16px;font-weight:700;border:2px solid rgba(255,255,255,.85);box-shadow:0 2px 6px rgba(0,0,0,.4)}
   .pl .shirt .flagbadge{position:absolute;top:-4px;right:-4px;font-size:11px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
   .pl.home .shirt{background:var(--accent);color:#04221a}.pl.away .shirt{background:#e0356f;color:#fff}
-  .pl .nm{font-size:9px;font-weight:700;text-align:center;background:rgba(0,0,0,.62);padding:2px 6px;border-radius:6px;line-height:1.1;white-space:nowrap;letter-spacing:-.2px}
+  .pl .nm{font-size:8.5px;font-weight:700;text-align:center;background:rgba(0,0,0,.72);padding:2px 5px;border-radius:6px;line-height:1.05;white-space:normal;word-break:break-word;max-width:70px;letter-spacing:-.2px}
   .bench{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:8px 0}
   .bench h4{font-size:12px;color:var(--mut);margin-bottom:7px}.bench.home h4{color:var(--accent)}.bench.away h4{color:#e0356f}
   .bench .subrow{display:flex;flex-wrap:wrap;gap:6px}
@@ -248,6 +248,17 @@
   .bc-row .rv{font-family:'Bebas Neue';font-size:16px;color:#fff;flex:0 0 auto;min-width:60px;text-align:left;direction:ltr}
   .bc-empty{text-align:center;color:var(--mut);font-size:12px;padding:14px}
   .bc-foot{background:#0a1120;text-align:center;padding:8px;font-size:10px;color:#5e6b8a;letter-spacing:.5px}
+  @media (max-width:520px){
+    .pcoverlay{padding:12px}
+    .bc-numbox{width:64px}.bc-num{font-size:44px}
+    .bc-rate{width:62px}.bc-rate .rv{font-size:27px}
+    .bc-who{padding:0 10px}.bc-name{font-size:17px}.bc-flag{font-size:13px}
+    .bc-bar{height:76px}
+    .bc-key .n{font-size:25px}.bc-key .l{font-size:9px}
+    .bc-row .rk{flex:0 0 96px;font-size:12px}
+    .bc-row .rv{min-width:54px;font-size:15px}
+    .pl{width:68px}.pl .nm{max-width:64px;font-size:8px}
+  }
   .ctrlbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
   .hidefin{display:inline-block;margin:0;padding:7px 14px;border-radius:20px;cursor:pointer;
     font-family:'Thmanyah';font-weight:700;font-size:12.5px;transition:.2s;
@@ -1161,8 +1172,7 @@ async function openLineup(btn,fixtureId,flag1,flag2){
     </div>
     ${bench(B,arB,'away')}`;
   showLineupOverlay(html);
-  // تصغير الأسماء الطويلة لتبقى سطراً واحداً
-  setTimeout(()=>{document.querySelectorAll('#luOverlay .pl .nm').forEach(nm=>{const MAXW=76;if(nm.scrollWidth>MAXW){const s=Math.max(.7,MAXW/nm.scrollWidth);nm.style.fontSize=(9*s).toFixed(1)+'px';}});},30);
+  // الأسماء تلتف تلقائياً لسطرين داخل عمود اللاعب (لا حاجة لتصغير قسري)
 }
 function openPlayerCard(idx){
   const reg=window.__PCREG||[];
@@ -1176,16 +1186,21 @@ function openPlayerCard(idx){
   const rateVal=r!=null?r.toFixed(1):'—';
   const posMap={G:'حارس',D:'مدافع',M:'وسط',F:'مهاجم'};
   const posAr=posMap[p.pos]||p.pos||'';
-  const acc=s.passAcc!=null?s.passAcc:(s.passes?Math.round((s.passes-(s.passes-s.passes))/Math.max(1,s.passes)*100):null);
-  const accPct=s.passAcc!=null?s.passAcc:null;
+  const total=s.passes||0;
+  // API يرجّع accuracy أحياناً كعدد تمريرات ناجحة (وليس نسبة). نحسب النسبة بأمان:
+  let accPct=null, accCount=null;
+  if(s.passAcc!=null){
+    if(total>0 && s.passAcc<=total){ accCount=s.passAcc; accPct=Math.round(s.passAcc/total*100); }
+    else { accPct=Math.round(s.passAcc); } // قيمة تبدو نسبة جاهزة
+  }
   const bar=(v)=>Math.max(4,Math.min(100,v));
-  // صفوف القاع
   const rows=[];
-  if(accPct!=null) rows.push(['دقة التمرير',accPct+'%',bar(accPct)]);
-  rows.push(['التمريرات',(s.passes||0)+(s.passKey?` · ${s.passKey} مفتاحية`:''),bar((s.passes||0)/120*100)]);
-  if(s.dribbles||s.dribbleAtt) rows.push(['مراوغات ناجحة',String(s.dribbles||0),bar((s.dribbles||0)/8*100)]);
-  if(s.tackles||s.interceptions) rows.push(['تدخلات/قطع',String((s.tackles||0)+(s.interceptions||0)),bar(((s.tackles||0)+(s.interceptions||0))/8*100)]);
-  if(s.fouls) rows.push(['أخطاء',String(s.fouls),bar(s.fouls/6*100)]);
+  if(accPct!=null) rows.push(['دقة التمرير', accPct+'%', bar(accPct)]);
+  rows.push(['التمريرات', accCount!=null?`${accCount}/${total}`:String(total), bar(total/90*100)]);
+  if(s.passKey) rows.push(['تمريرات مفتاحية', String(s.passKey), bar(s.passKey/5*100)]);
+  if(s.dribbles||s.dribbleAtt) rows.push(['مراوغات ناجحة', String(s.dribbles||0), bar((s.dribbles||0)/8*100)]);
+  if(s.tackles||s.interceptions) rows.push(['تدخلات/قطع', String((s.tackles||0)+(s.interceptions||0)), bar(((s.tackles||0)+(s.interceptions||0))/8*100)]);
+  if(s.fouls) rows.push(['أخطاء', String(s.fouls), bar(s.fouls/6*100)]);
   const rowsHtml=rows.map(([k,v,w])=>`<div class="bc-row"><span class="rk">${k}</span><div class="rbar"><div class="rfill" style="width:${w}%"></div></div><span class="rv">${v}</span></div>`).join('');
   const html=`<div class="bc" style="--team:${team};--team2:${team2}">
     <div class="bc-bar">
