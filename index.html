@@ -224,6 +224,7 @@
   @keyframes cuepulse{0%,100%{box-shadow:0 2px 6px rgba(0,0,0,.4)}50%{box-shadow:0 2px 6px rgba(0,0,0,.4),0 0 0 4px rgba(0,224,164,.18)}}
   .lu-tip{text-align:center;background:rgba(0,224,164,.10);border:1px solid rgba(0,224,164,.35);color:var(--txt);border-radius:10px;padding:8px 12px;font-size:12.5px;margin-bottom:12px}
   .lu-tip b{color:var(--accent)}
+  .lu-tip.nostats{background:rgba(133,147,179,.10);border-color:var(--line);color:var(--mut)}
   /* بطاقة اللاعب — ستايل بث */
   .pcoverlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(3px)}
   .pcwrap{max-width:380px;width:100%}
@@ -278,6 +279,7 @@
   .hidefin.off{background:transparent;color:var(--mut);border:1px solid var(--line)}
   .hidefin.off:hover{color:var(--txt)}
   .empty{text-align:center;color:var(--mut);padding:40px 0}
+  .emptyhint{display:block;margin-top:8px;font-size:12.5px;color:var(--accent);opacity:.85}
   .tsub{font-size:11px;color:var(--mut);font-weight:500;margin-top:1px}
   .bracket{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin}
   .bcol{flex:0 0 230px;display:flex;flex-direction:column;gap:10px}
@@ -343,7 +345,7 @@
     <button id="hideFinBtn" class="hidefin" onclick="toggleHideFinished()">اضغط لإظهار المباريات المنتهية</button>
   </div>
   <div id="list"></div>
-  <div class="empty" id="empty" style="display:none">ما فيه مباريات في هذا التصنيف.</div>
+  <div class="empty" id="empty" style="display:none">ما فيه مباريات في هذا التصنيف.<span class="emptyhint">الرجاء التأكد من الفلاتر (اليوم / المباريات المنتهية).</span></div>
 </div>
 
 <button id="toTop" class="totop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="أعلى الصفحة">↑</button>
@@ -943,7 +945,12 @@ function render(){
     if(curFilter==='ksa')return matchHasArab(m);
     return m.stage===curFilter;
   });
-  if(!rows.length){empty.textContent=searchQuery?`ما فيه نتائج لـ "${searchQuery}".`:'ما فيه مباريات في هذا التصنيف.';empty.style.display='block';return}
+  if(!rows.length){
+    empty.innerHTML = searchQuery
+      ? `ما فيه نتائج لـ "${searchQuery}".<span class="emptyhint">جرّب اسم منتخب آخر أو امسح البحث.</span>`
+      : `ما فيه مباريات في هذا التصنيف.<span class="emptyhint">الرجاء التأكد من الفلاتر (اليوم / المباريات المنتهية).</span>`;
+    empty.style.display='block';return;
+  }
   empty.style.display='none';
   let lastDay=null,dg=null;
   const todayStr=(()=>{const n=new Date();const u=new Date(n.getTime()+(n.getTimezoneOffset()+180)*60000);return u.getDate()+" "+MON[u.getMonth()];})();
@@ -1098,7 +1105,7 @@ function altKit(kit){
   return lum>140 ? {bg:'#16213e',fg:'#fff',border:'rgba(255,255,255,.7)'} : {bg:'#f0f0f0',fg:'#111',border:'rgba(0,0,0,.3)'};
 }
 function arTeam(en){const k=NAME[norm(en)];return k?k[0]:en;}
-const LINEUP_CACHE_KEY="wc26-lineup-cache-v1";
+const LINEUP_CACHE_KEY="wc26-lineup-cache-v2";
 function loadLineupCache(){try{return JSON.parse(localStorage.getItem(LINEUP_CACHE_KEY)||"{}");}catch(e){return {};}}
 function saveLineupToCache(id,data){
   try{const c=loadLineupCache();c[id]={data,ts:Date.now()};
@@ -1200,8 +1207,15 @@ async function openLineup(btn,fixtureId,flag1,flag2){
     (team.subs||[]).map(s=>{const inn=cameIn[s.name];return `<span class="subchip${inn?' camein':''}">${inn?`<span class="arr in">${arrow}</span>`:''}<b>${s.num||''}</b> ${s.name}</span>`;}).join('')||'<span class="subchip">غير متوفر</span>'
   }</div></div>`;
   };
+  const pitchA=pitchPlayers(A,true,flag1,kitA);
+  const pitchB=pitchPlayers(B,false,flag2,kitB);
+  // هل فيه أي لاعب وصلته إحصائيات؟ (تحدد نوع التلميح)
+  const hasAnyStats=(window.__PCREG||[]).length>0;
+  const tip = hasAnyStats
+    ? `<div class="lu-tip">👆 اضغط على أي لاعب <b>مميّز بنقطة خضراء</b> لعرض إحصائياته</div>`
+    : `<div class="lu-tip nostats">ℹ️ إحصائيات اللاعبين غير متوفرة لهذه المباراة بعد — تظهر أثناء/بعد اللعب حسب توفّرها في المصدر.</div>`;
   const html=`
-    <div class="lu-tip">👆 اضغط على أي لاعب <b>مميّز بنقطة خضراء</b> لعرض إحصائياته</div>
+    ${tip}
     <div class="lu-head">
       <div class="lu-side"><span class="lu-team">${flag1} ${arA}</span><span class="lu-form">${A.formation||''}</span>${A.coach?`<span class="lu-coach">المدرب: ${A.coach}</span>`:''}</div>
       <div class="lu-side away"><span class="lu-team">${arB} ${flag2}</span><span class="lu-form">${B.formation||''}</span>${B.coach?`<span class="lu-coach">المدرب: ${B.coach}</span>`:''}</div>
@@ -1211,7 +1225,7 @@ async function openLineup(btn,fixtureId,flag1,flag2){
       <div class="goal top"></div><div class="box6 top"></div><div class="box top"></div>
       <div class="midline"></div><div class="circle"></div><div class="spot"></div>
       <div class="goal bot"></div><div class="box6 bot"></div><div class="box bot"></div>
-      ${pitchPlayers(A,true,flag1,kitA)}${pitchPlayers(B,false,flag2,kitB)}
+      ${pitchA}${pitchB}
     </div>
     ${bench(B,arB,'away')}`;
   showLineupOverlay(html);
