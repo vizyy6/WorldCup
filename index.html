@@ -270,9 +270,6 @@
 </div>
 
 <div class="wrap">
-  <div class="note">
-    التوقيت بتوقيت السعودية (الرياض)، ومباريات المنتخبات العربية 🌍 مميّزة بالذهبي.
-  </div>
   <div class="searchbar">
     <span class="searchic">🔍</span>
     <input type="text" id="searchInput" placeholder="ابحث" oninput="onSearch(this.value)" autocomplete="off">
@@ -779,17 +776,28 @@ function toggleTodayOnly(){
   }
   render();
 }
+function normAr(s){
+  // تطبيع عربي: يوحّد الهمزات والألفات والياء والتاء المربوطة، ويشيل التشكيل
+  return norm(s)
+    .replace(/[\u0623\u0625\u0622\u0671]/g,'\u0627') // أ إ آ ٱ -> ا
+    .replace(/\u0649/g,'\u064a')                     // ى -> ي
+    .replace(/\u0629/g,'\u0647')                     // ة -> ه
+    .replace(/\u0624/g,'\u0648')                     // ؤ -> و
+    .replace(/\u0626/g,'\u064a')                     // ئ -> ي
+    .replace(/\u0621/g,'')                           // ء تُحذف
+    .replace(/[\u064B-\u0652\u0640]/g,'');           // تشكيل وتطويل
+}
 function matchHasQuery(m,q){
   if(!q)return true;
-  q=norm(q);
+  q=normAr(q);
   // اجمع كل الأسماء الممكنة: الإنجليزي المُطبّع + العربي لكل فريق
   const parts=[];
-  if(m.t1raw)parts.push(norm(m.t1raw));
-  if(m.t2raw)parts.push(norm(m.t2raw));
-  if(m.t1&&m.t1[0])parts.push(norm(m.t1[0]));
-  if(m.t2&&m.t2[0])parts.push(norm(m.t2[0]));
+  if(m.t1raw)parts.push(normAr(m.t1raw));
+  if(m.t2raw)parts.push(normAr(m.t2raw));
+  if(m.t1&&m.t1[0])parts.push(normAr(m.t1[0]));
+  if(m.t2&&m.t2[0])parts.push(normAr(m.t2[0]));
   // للأدوار الإقصائية بدون فرق محددة، ابحث في النص المعروض
-  if(!m.t1&&m.t2&&m.t2[0])parts.push(norm(m.t2[0]));
+  if(!m.t1&&m.t2&&m.t2[0])parts.push(normAr(m.t2[0]));
   return parts.some(p=>p.includes(q));
 }
 function onSearch(v){
