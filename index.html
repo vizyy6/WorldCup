@@ -333,7 +333,7 @@
 </div>
 
 <div class="wrap">
-  <div class="searchbar">
+  <div class="searchbar" id="searchBar">
     <span class="searchic">🔍</span>
     <input type="text" id="searchInput" placeholder="ابحث" oninput="onSearch(this.value)" autocomplete="off">
     <button id="searchClear" class="searchclear" onclick="clearSearch()" style="display:none" aria-label="مسح">✕</button>
@@ -918,6 +918,8 @@ function render(){
   const hb=document.getElementById('hideFinBtn');
   const tb=document.getElementById('todayBtn');
   const listView=!(curFilter==='groups'||curFilter==='scorers'||curFilter==='bracket');
+  const sbar=document.getElementById('searchBar');
+  if(sbar)sbar.style.display=(curFilter==='all')?'flex':'none';
   if(hb)hb.style.display=(listView&&!searchQuery)?'inline-block':'none';
   if(tb)tb.style.display=(listView&&curFilter==='all'&&!searchQuery)?'inline-block':'none';
   if(curFilter==='groups'){renderStandings();return;}
@@ -1293,7 +1295,14 @@ async function loadLive(){
 document.getElementById('frow').addEventListener('click',e=>{
   const b=e.target.closest('.chip');if(!b)return;
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
-  b.classList.add('on');curFilter=b.dataset.f;render();
+  b.classList.add('on');curFilter=b.dataset.f;
+  // امسح البحث عند مغادرة تبويب "الكل" (مربع البحث يظهر فيه فقط)
+  if(curFilter!=='all' && searchQuery){
+    searchQuery='';
+    const i=document.getElementById('searchInput');if(i)i.value='';
+    const c=document.getElementById('searchClear');if(c)c.style.display='none';
+  }
+  render();
 });
 document.getElementById('refreshBtn').addEventListener('click',async()=>{
   const b=document.getElementById('refreshBtn');
@@ -1304,21 +1313,38 @@ document.getElementById('refreshBtn').addEventListener('click',async()=>{
 });
 
 render();        // اعرض الاحتياطي فوراً
-loadLive().then(loadScores);   // ثم حدّث من المصدر + النتائج اللحظية
+loadLive().then(()=>loadScores(true));   // ثم حدّث من المصدر + آخر النتائج (كسر الكاش)
 
 // استطلاع تكيفي: كل ٢٠ ثانية وقت مباراة مباشرة، كل ٣ دقائق خارجها
 function shouldBeLive(m){
   // المباراة يفترض أنها جارية لو مرّ موعد انطلاقها بأقل من ساعتين ونصف ولم تُحسم بعد
   return m.epoch && Date.now()>=m.epoch && Date.now() < m.epoch + 150*60*1000 && !m.finished;
 }
+function startingSoon(m){
+  // على وشك البداية: موعدها خلال ٣ دقائق — نبدأ التحديث السريع قبل صافرة البداية
+  return m.epoch && !m.finished && (m.epoch - Date.now()) > 0 && (m.epoch - Date.now()) < 3*60*1000;
+}
 function anyLiveNow(){
-  return DATA.some(m => m.liveNow || shouldBeLive(m));
+  return DATA.some(m => m.liveNow || shouldBeLive(m) || startingSoon(m));
 }
 function pollLoop(){
   const wait = anyLiveNow() ? 10*1000 : 60*1000;
   setTimeout(async ()=>{ await loadScores(); render(); pollLoop(); }, wait);
 }
 pollLoop();
+
+// تحديث فوري على آخر البيانات كلما عادت الصفحة للظهور (رجوع من تطبيق آخر/تبويب آخر)
+let _lastRefresh=Date.now();
+async function refreshNow(){
+  _lastRefresh=Date.now();
+  await Promise.allSettled([loadLive(), loadScores(true)]);
+  render();
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible' && Date.now()-_lastRefresh>5000){ refreshNow(); }
+});
+window.addEventListener('pageshow',(e)=>{ if(e.persisted) refreshNow(); });
+window.addEventListener('focus',()=>{ if(Date.now()-_lastRefresh>5000) refreshNow(); });
 // أداة التثبيت: افتح الرابط بـ #export لاستخراج النتائج الدائمة
 if(location.hash==='#export'){ loadLive().then(()=>loadScores(true)).then(()=>setTimeout(showExport,1500)); }
 
