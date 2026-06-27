@@ -280,6 +280,38 @@
   .empty{text-align:center;color:var(--mut);padding:40px 0}
   .tsub{font-size:11px;color:var(--mut);font-weight:500;margin-top:1px}
   .bracket{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin}
+  /* ===== الشجرة المتفرّعة ===== */
+  .brkt{display:flex;overflow-x:auto;padding:6px 2px 18px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .brkt::-webkit-scrollbar{height:6px}.brkt::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .brnd{flex:0 0 auto;display:flex;flex-direction:column;justify-content:space-around;min-width:152px}
+  .brnd-hd{position:sticky;top:0;text-align:center;font-weight:800;font-size:11px;color:var(--accent);padding:6px 0;margin-bottom:4px;letter-spacing:.5px;background:rgba(10,14,26,.72);border:1px solid var(--line);border-radius:9px;backdrop-filter:blur(6px);z-index:4}
+  .brnd.rfinal{min-width:166px}.brnd.rfinal .brnd-hd{color:var(--gold);border-color:rgba(255,203,69,.4)}
+  .bcell{flex:1;display:flex;align-items:center;position:relative;min-height:62px}
+  .bbx{width:124px;margin:0 13px;background:linear-gradient(150deg,#18233f,#111a30);border:1px solid var(--line);border-radius:11px;overflow:hidden;box-shadow:0 5px 16px rgba(0,0,0,.35);position:relative;z-index:2}
+  .bbx.live{border-color:rgba(0,224,164,.55);box-shadow:0 0 0 1px rgba(0,224,164,.3),0 5px 18px rgba(0,224,164,.12)}
+  .bbx.arab{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset,0 5px 18px rgba(255,203,69,.12)}
+  .bbx.bfin{background:linear-gradient(150deg,#2a2410,#1a1606);border:1.5px solid var(--gold);box-shadow:0 0 24px rgba(255,203,69,.22)}
+  .btrophy{text-align:center;font-size:22px;padding:6px 0 0}
+  .btag{position:absolute;top:-8px;right:8px;font-size:8px;font-weight:800;padding:1px 6px;border-radius:5px;z-index:3}
+  .btag.bt-n{background:var(--line);color:var(--mut)}
+  .btag.bt-l{background:var(--accent);color:#04221a;animation:blp 1.5s infinite}
+  .btag.bt-f{background:rgba(255,61,127,.18);color:var(--accent2)}
+  @keyframes blp{0%,100%{opacity:1}50%{opacity:.55}}
+  .brow{display:flex;align-items:center;gap:6px;padding:6px 9px;position:relative}
+  .brow+.brow{border-top:1px solid rgba(255,255,255,.05)}
+  .brow .bfl{font-size:14px;width:18px;text-align:center;flex:0 0 auto;line-height:1}
+  .brow .bfl .btlogo{width:16px;height:16px;object-fit:contain;vertical-align:middle}
+  .brow .bnm{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+  .brow .bsc{font-family:'Bebas Neue';font-size:16px;color:var(--mut);flex:0 0 auto;min-width:13px;text-align:center}
+  .brow.bw .bnm{color:#fff}.brow.bw .bsc{color:var(--gold)}
+  .brow.bw::before{content:"";position:absolute;right:0;top:0;bottom:0;width:3px;background:var(--gold)}
+  .brow.bl{opacity:.48}.brow.bl .bnm{text-decoration:line-through;text-decoration-color:var(--accent2);text-decoration-thickness:1.5px}
+  .brow.bph .bnm{color:var(--mut);font-weight:600;font-size:10px}
+  .bmeta2{font-size:9px;color:var(--mut);text-align:center;padding:3px;background:rgba(0,0,0,.2);direction:rtl}
+  /* خطوط الوصل المتفرّعة (RTL: الدور التالي على اليسار) */
+  .brnd:not(:last-child) .bbx::after{content:"";position:absolute;top:50%;left:-13px;width:13px;height:2px;background:var(--line)}
+  .brnd:not(:last-child) .bcell.up::before{content:"";position:absolute;left:-13px;top:50%;bottom:-50%;width:2px;background:var(--line)}
+  .brnd:not(:last-child) .bcell.down::before{content:"";position:absolute;left:-13px;top:-50%;bottom:50%;width:2px;background:var(--line)}
   .bcol{flex:0 0 230px;display:flex;flex-direction:column;gap:10px}
   .bhd{font-weight:800;color:var(--accent);font-size:14px;padding:6px 2px;border-bottom:1px solid var(--line)}
   .bm{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
@@ -824,38 +856,69 @@ function renderScorers(){
     <table class="grptbl"><thead><tr><th></th><th>اللاعب</th><th>صناعة</th><th>أهداف</th></tr></thead><tbody>${rows}</tbody></table>`;
   list.appendChild(card);
 }
+function resolveWinners(){
+  // خريطة رقم المباراة -> الفائز {t:[اسم,علم], logo}
+  const win={};
+  DATA.forEach(m=>{
+    if(m.stage==='groups'||!m.num||!m.t1)return;
+    const sc=m.score; const fin=m.finished||(sc&&!m.liveNow);
+    if(!fin||!sc||sc[0]===sc[1])return;
+    win[m.num]= sc[0]>sc[1] ? {t:m.t1,logo:m.logo1||''} : {t:m.t2,logo:m.logo2||''};
+  });
+  return win;
+}
 function renderBracket(){
   const ROUNDS=[['r32','دور الـ32'],['r16','دور الـ16'],['qf','ربع النهائي'],['sf','نصف النهائي'],['final','النهائي']];
-  const br=document.createElement('div');br.className='bracket';
+  const WIN=resolveWinners();
+  // يحلّ "فائز N" إلى الفائز الفعلي إن توفّر
+  const resolveSide=(txt)=>{
+    const mm=(txt||'').match(/فائز\s*(\d+)/);
+    if(mm && WIN[+mm[1]]) return {t:WIN[+mm[1]].t, logo:WIN[+mm[1]].logo, real:true};
+    return {t:[txt||'يُحدَّد','🏳️'], logo:'', real:false};
+  };
+  const br=document.createElement('div');br.className='brkt';
   ROUNDS.forEach(([key,title])=>{
     const ms=DATA.filter(m=>m.stage===key).sort((a,b)=>(a.num||9999)-(b.num||9999)||a.order-b.order);
     if(!ms.length)return;
-    const col=document.createElement('div');col.className='bcol';
-    let html=`<div class="bhd">${title}</div>`;
-    ms.forEach(m=>{
+    const col=document.createElement('div');col.className='brnd'+(key==='final'?' rfinal':'');
+    let html=`<div class="brnd-hd">${title}</div>`;
+    ms.forEach((m,ci)=>{
       const sc=m.score;
       const fin=m.finished||(sc&&!m.liveNow);
-      const line=(t,s,win,lose)=>`<div class="bteam ${win?'bwin':''} ${lose?'isout':''}"><span class="bflag">${t[1]||''}</span><span class="bname ${lose?'tn out':''}">${t[0]}</span>${lose?'<span class="outtag sm">خروج</span>':''}${s!=null?`<span class="bsc">${s}</span>`:''}</div>`;
-      let inner;
+      const live=m.liveNow;
+      // حدّد الفريقين (حقيقيين أو محلولين من فائز N)
+      let A,B,logoA,logoB,realA=true,realB=true,scA=null,scB=null;
       if(m.t1){
-        const l1=fin&&sc&&sc[0]<sc[1], l2=fin&&sc&&sc[1]<sc[0];
-        inner=line(m.t1,sc?sc[0]:null,sc&&m.finished&&sc[0]>sc[1],l1)+line(m.t2,sc?sc[1]:null,sc&&m.finished&&sc[1]>sc[0],l2);
+        A=m.t1;B=m.t2;logoA=m.logo1||'';logoB=m.logo2||'';
+        scA=sc?sc[0]:null;scB=sc?sc[1]:null;
       }else{
-        const parts=m.t2[0].split(' \u00d7 ');
-        inner=`<div class="bteam bph">${parts[0]}</div><div class="bteam bph">${parts[1]||''}</div>`;
+        const parts=(m.t2[0]||'').split(' × ');
+        const ra=resolveSide(parts[0]),rb=resolveSide(parts[1]);
+        A=ra.t;B=rb.t;logoA=ra.logo;logoB=rb.logo;realA=ra.real;realB=rb.real;
       }
-      const status = (m.finished||(sc&&!m.liveNow)) ? `<span class="bft">انتهت</span>`
-        : m.liveNow ? `<span class="blive">\u25cf مباشر</span>`
-        : `${m.day} \u00b7 ${m.time} ${m.ap}`;
-      html+=`<div class="bm ${matchHasArab(m)?'bksa':''}">
-        ${m.num?`<div class="bnum">#${m.num}${m.grp==='م. الثالث'?' \u00b7 م. الثالث':''}</div>`:(m.grp==='م. الثالث'?`<div class="bnum">م. الثالث</div>`:'')}
-        ${inner}<div class="bmeta">${status}</div></div>`;
+      const w1=fin&&sc&&sc[0]>sc[1], w2=fin&&sc&&sc[1]>sc[0];
+      const l1=fin&&sc&&sc[0]<sc[1], l2=fin&&sc&&sc[1]<sc[0];
+      const arab=matchHasArab(m)||isArab(A[0])||isArab(B[0]);
+      const badge=(logo,t)=>logo?`<img class="btlogo" src="${logo}" onerror="this.outerHTML='${(t[1]||'🏳️').replace(/'/g,'')}'">`:`<span>${t[1]||'🏳️'}</span>`;
+      const teamRow=(t,logo,sc,win,lose,real)=>`<div class="brow ${win?'bw':''} ${lose?'bl':''} ${!real&&!m.t1?'bph':''}">
+        <span class="bfl">${badge(logo,t)}</span><span class="bnm">${t[0]}</span>${sc!=null?`<span class="bsc">${sc}</span>`:''}</div>`;
+      const tag=live?'<span class="btag bt-l">● مباشر</span>':fin?'<span class="btag bt-f">انتهت</span>':(m.num?`<span class="btag bt-n">#${m.num}</span>`:'');
+      const meta=(!fin&&!live)?`<div class="bmeta2">${m.day||''} · ${m.time||''} ${m.ap||''}</div>`:'';
+      const isFinal=key==='final';
+      html+=`<div class="bcell ${ci%2===0?'up':'down'}">
+        <div class="bbx ${live?'live':''} ${arab?'arab':''} ${isFinal?'bfin':''}">
+          ${isFinal?'<div class="btrophy">🏆</div>':''}
+          ${tag}
+          ${teamRow(A,logoA,scA,w1,l1,realA)}
+          ${teamRow(B,logoB,scB,w2,l2,realB)}
+          ${meta}
+        </div></div>`;
     });
     col.innerHTML=html;br.appendChild(col);
   });
   list.appendChild(br);
   const hint=document.createElement('div');hint.className='leg';
-  hint.innerHTML='<span class="dotg"></span> اسحب يميناً ويساراً لاستعراض الأدوار — الفرق تتعبّى تلقائياً مع تقدم البطولة.';
+  hint.innerHTML='<span class="dotg"></span> ← اسحب يساراً لاستعراض الأدوار · الفائز ينتقل تلقائياً للدور التالي';
   list.appendChild(hint);
 }
 function toggleHideFinished(){
