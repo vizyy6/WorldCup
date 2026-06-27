@@ -103,6 +103,7 @@
     .cneon{margin:2px 10px}
   }
   .flag{font-size:22px;line-height:1;width:26px;text-align:center;flex:0 0 auto}
+  .tlogo{width:24px;height:24px;object-fit:contain;vertical-align:middle;display:inline-block}
   .vs{color:var(--mut);font-size:12px;font-weight:500;padding-right:35px}
   .meta{text-align:left;direction:ltr;display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:108px}
   .time{font-family:'Bebas Neue';font-size:30px;color:var(--txt);line-height:.9;letter-spacing:1px}
@@ -208,6 +209,45 @@
   .searchbar input::placeholder{color:var(--mut);font-weight:500}
   .searchclear{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:none;background:var(--line);color:var(--txt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;padding:0;transition:.15s}
   .searchclear:hover{background:var(--accent2);color:#fff}
+  .pl .subout{position:absolute;top:-5px;left:-5px;width:15px;height:15px;border-radius:50%;background:#ff3d5a;color:#fff;border:1.5px solid #fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+  /* مؤشّر اللاعب القابل للضغط */
+  .pl .shirt.hasstats{cursor:pointer;animation:cuepulse 2.4s ease-in-out infinite}
+  .pl .shirt.hasstats:hover{transform:scale(1.12);transition:.15s}
+  .pl .statcue{position:absolute;top:-4px;right:-4px;width:11px;height:11px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 7px rgba(0,224,164,.9)}
+  @keyframes cuepulse{0%,100%{box-shadow:0 2px 6px rgba(0,0,0,.4)}50%{box-shadow:0 2px 6px rgba(0,0,0,.4),0 0 0 4px rgba(0,224,164,.18)}}
+  .lu-tip{text-align:center;background:rgba(0,224,164,.10);border:1px solid rgba(0,224,164,.35);color:var(--txt);border-radius:10px;padding:8px 12px;font-size:12.5px;margin-bottom:12px}
+  .lu-tip b{color:var(--accent)}
+  /* بطاقة اللاعب — ستايل بث */
+  .pcoverlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(3px)}
+  .pcwrap{max-width:380px;width:100%}
+  .pcwrap .luclose{margin-bottom:12px}
+  .bc{background:#0d1426;border-radius:14px;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.6);border:1px solid #1e2a45}
+  .bc-bar{position:relative;background:linear-gradient(100deg,var(--team) 0%,var(--team) 62%,var(--team2) 62%,var(--team2) 100%);height:84px;display:flex;align-items:stretch;overflow:hidden}
+  .bc-bar::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 40%,rgba(0,0,0,.22))}
+  .bc-numbox{width:80px;display:flex;align-items:center;justify-content:center;position:relative;z-index:2;border-left:3px solid rgba(255,255,255,.25)}
+  .bc-num{font-family:'Bebas Neue';font-size:54px;color:#fff;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.4)}
+  .bc-who{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 14px;z-index:2;min-width:0}
+  .bc-flag{font-size:14px;color:rgba(255,255,255,.92);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bc-name{font-size:19px;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bc-pos{font-size:11px;color:rgba(255,255,255,.85);font-weight:600;margin-top:3px}
+  .bc-rate{width:72px;background:rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2}
+  .bc-rate .rv{font-family:'Bebas Neue';font-size:32px;color:#fff;line-height:.85}
+  .bc-rate .rl{font-size:8px;color:rgba(255,255,255,.8);font-weight:700;letter-spacing:1px;margin-top:2px}
+  .bc-rate.hi .rv{color:#7CFFB2}.bc-rate.low .rv{color:#ff9db0}
+  .bc-key{display:flex;background:#101a30;border-bottom:1px solid #1e2a45}
+  .bc-key .cell{flex:1;text-align:center;padding:12px 4px;border-left:1px solid #1e2a45}
+  .bc-key .cell:last-child{border-left:none}
+  .bc-key .n{font-family:'Bebas Neue';font-size:28px;color:#fff;line-height:.9}.bc-key .n.g{color:var(--gold)}
+  .bc-key .l{font-size:10px;color:var(--mut);margin-top:3px;font-weight:600}
+  .bc-rows{padding:6px 14px 10px}
+  .bc-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #182238}
+  .bc-row:last-child{border-bottom:none}
+  .bc-row .rk{font-size:12.5px;color:#aab6d4;flex:0 0 116px;font-weight:600}
+  .bc-row .rbar{flex:1;height:7px;background:#1a2540;border-radius:4px;overflow:hidden}
+  .bc-row .rfill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--team),#ffffff55)}
+  .bc-row .rv{font-family:'Bebas Neue';font-size:16px;color:#fff;flex:0 0 auto;min-width:60px;text-align:left;direction:ltr}
+  .bc-empty{text-align:center;color:var(--mut);font-size:12px;padding:14px}
+  .bc-foot{background:#0a1120;text-align:center;padding:8px;font-size:10px;color:#5e6b8a;letter-spacing:.5px}
   .ctrlbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
   .hidefin{display:inline-block;margin:0;padding:7px 14px;border-radius:20px;cursor:pointer;
     font-family:'Thmanyah';font-weight:700;font-size:12.5px;transition:.2s;
@@ -580,6 +620,8 @@ function preserveMatchState(prevData){
     // ملاحظة: لا نحتفظ بالدقيقة القديمة (elapsed) — تُجلب طازجة من الووركر فقط حتى لا تتجمّد
     if(old.goals&&old.goals.length&&!(m.goals&&m.goals.length))m.goals=old.goals;
     if(old.cards&&old.cards.length&&!(m.cards&&m.cards.length))m.cards=old.cards;
+    if(old.logo1&&!m.logo1)m.logo1=old.logo1;
+    if(old.logo2&&!m.logo2)m.logo2=old.logo2;
   });
 }
 function mergeScores(j){
@@ -600,6 +642,11 @@ function mergeScores(j){
     m.finished = best.status==='FT';
     m.elapsed = best.elapsed||null;
     if(best.id) m.fixtureId = best.id;
+    // شعارات الفرق الحقيقية (مع مراعاة قلب الاتجاه)
+    if(best.hlogo||best.alogo){
+      m.logo1 = flip ? (best.alogo||'') : (best.hlogo||'');
+      m.logo2 = flip ? (best.hlogo||'') : (best.alogo||'');
+    }
     const ng=(best.goals||[]).map(g=>({
       side: flip ? (g.side==='h'?'a':'h') : g.side,
       player:g.player, min:g.min, plus:g.plus, pen:g.pen, og:g.og
@@ -669,8 +716,11 @@ applyPrintedResults();
 applyGoalsCache();
 const ST={groups:["g","المجموعة"],r32:["k","دور 32"],r16:["k",""],qf:["k","ربع"],sf:["k","نصف"],final:["f","النهائي"]};
 
-function teamRow(t,sc,win){
-  return `<div class="team ${win?'win':''}"><span class="flag">${t[1]||"🏳️"}</span>${t[0]}${sc!=null?`<span class="sc">${sc}</span>`:''}</div>`;
+function teamRow(t,sc,win,logo){
+  const badge = logo
+    ? `<span class="flag"><img class="tlogo" src="${logo}" alt="" loading="lazy" onerror="this.parentElement.textContent='${(t[1]||'🏳️').replace(/'/g,'')}'"></span>`
+    : `<span class="flag">${t[1]||"🏳️"}</span>`;
+  return `<div class="team ${win?'win':''}">${badge}${t[0]}${sc!=null?`<span class="sc">${sc}</span>`:''}</div>`;
 }
 function buildStandings(){
   const groups={};
@@ -872,7 +922,7 @@ function render(){
     const dsc = sc || (statusEarly==='live' ? [0,0] : null);
     let teamsHtml;
     if(m.t1){
-      teamsHtml=teamRow(m.t1,dsc?dsc[0]:null,dsc&&statusEarly==='finished'&&dsc[0]>dsc[1])+`<div class="vs">×</div>`+teamRow(m.t2,dsc?dsc[1]:null,dsc&&statusEarly==='finished'&&dsc[1]>dsc[0]);
+      teamsHtml=teamRow(m.t1,dsc?dsc[0]:null,dsc&&statusEarly==='finished'&&dsc[0]>dsc[1],m.logo1)+`<div class="vs">×</div>`+teamRow(m.t2,dsc?dsc[1]:null,dsc&&statusEarly==='finished'&&dsc[1]>dsc[0],m.logo2);
     }else{
       const parts=m.t2[0].split(' × ');
       teamsHtml=`<div class="team" style="font-size:15px">${parts[0]}</div><div class="vs">×</div><div class="team" style="font-size:15px">${parts[1]||''}</div>`;
@@ -1030,11 +1080,14 @@ async function openLineup(btn,fixtureId,flag1,flag2){
   subsList.forEach(s=>{ if(s.inP)cameIn[s.inP]={min:s.min,plus:s.plus}; if(s.outP)wentOut[s.outP]={min:s.min,plus:s.plus}; });
   const arA=arTeam(A.team), arB=arTeam(B.team);
   // ألوان الأطقم الأساسية لكل منتخب (لون القميص، لون الرقم) — بالاسم العربي
+  window.__PCREG=[];
   const kitA=teamKit(arA,A.teamId), kitBraw=teamKit(arB,B.teamId);
   // كشف تشابه اللون: لو متقاربين، الفريق الثاني ياخذ طقمه الاحتياطي (أبيض/داكن)
   const kitB = colorsClash(kitA.bg,kitBraw.bg) ? altKit(kitBraw) : kitBraw;
   const lastName=n=>n;
   const pitchPlayers=(team,topHalf,flag,kit)=>{
+    window.__PCREG=window.__PCREG||[];
+    const teamAr=arTeam(team.team);
     let players=(team.start||[]).slice();
     if(!players.length)return '';
     const haveGrid=players.filter(p=>p.grid).length>=players.length-1; // أغلبهم له grid؟
@@ -1072,8 +1125,18 @@ async function openLineup(btn,fixtureId,flag1,flag2){
       const x=3+(o.c/(o.cols+1))*94;
       const out=wentOut[o.p.name];
       const outArrow = topHalf ? '↑' : '↓';   // العلوي يأشّر لفوق لدكته، السفلي لتحت لدكته
+      // لو فيه إحصائيات لهذا اللاعب، خلّيه قابلاً للضغط مع مؤشّر واضح
+      const hasStats = o.p.stats && (o.p.stats.rating!=null || o.p.stats.minutes);
+      let click='', cue='', cls='shirt';
+      if(hasStats){
+        const idx=window.__PCREG.length;
+        window.__PCREG.push({name:o.p.name,num:o.p.num,flag,teamAr,pos:o.p.pos,kit,stats:o.p.stats});
+        click=` onclick="openPlayerCard(${idx})"`;
+        cls='shirt hasstats';
+        cue='<span class="statcue"></span>';
+      }
       return `<div class="pl" style="top:${y}%;left:${x}%">
-        <div class="shirt" style="background:${kit.bg};color:${kit.fg};border-color:${kit.border||'rgba(255,255,255,.85)'}">${o.p.num||''}<span class="flagbadge">${flag}</span>${out?`<span class="subout">${outArrow}</span>`:''}</div>
+        <div class="${cls}"${click} style="background:${kit.bg};color:${kit.fg};border-color:${kit.border||'rgba(255,255,255,.85)'}">${o.p.num||''}<span class="flagbadge">${flag}</span>${cue}${out?`<span class="subout">${outArrow}</span>`:''}</div>
         <div class="nm">${o.p.name||''}</div></div>`;
     }).join('');
   };
@@ -1084,6 +1147,7 @@ async function openLineup(btn,fixtureId,flag1,flag2){
   }</div></div>`;
   };
   const html=`
+    <div class="lu-tip">👆 اضغط على أي لاعب <b>مميّز بنقطة خضراء</b> لعرض إحصائياته</div>
     <div class="lu-head">
       <div class="lu-side"><span class="lu-team">${flag1} ${arA}</span><span class="lu-form">${A.formation||''}</span>${A.coach?`<span class="lu-coach">المدرب: ${A.coach}</span>`:''}</div>
       <div class="lu-side away"><span class="lu-team">${arB} ${flag2}</span><span class="lu-form">${B.formation||''}</span>${B.coach?`<span class="lu-coach">المدرب: ${B.coach}</span>`:''}</div>
@@ -1099,6 +1163,50 @@ async function openLineup(btn,fixtureId,flag1,flag2){
   showLineupOverlay(html);
   // تصغير الأسماء الطويلة لتبقى سطراً واحداً
   setTimeout(()=>{document.querySelectorAll('#luOverlay .pl .nm').forEach(nm=>{const MAXW=76;if(nm.scrollWidth>MAXW){const s=Math.max(.7,MAXW/nm.scrollWidth);nm.style.fontSize=(9*s).toFixed(1)+'px';}});},30);
+}
+function openPlayerCard(idx){
+  const reg=window.__PCREG||[];
+  const p=reg[idx]; if(!p)return;
+  const s=p.stats||{};
+  const team=p.kit&&p.kit.bg?p.kit.bg:'#00e0a4';
+  // اللون الثاني: مشتق من طقم الفريق إن وُجد، وإلا أخضر
+  const team2='#0c7d40';
+  const r=s.rating;
+  const rateCls=r==null?'':(r>=7.5?'hi':(r>=6.5?'mid':'low'));
+  const rateVal=r!=null?r.toFixed(1):'—';
+  const posMap={G:'حارس',D:'مدافع',M:'وسط',F:'مهاجم'};
+  const posAr=posMap[p.pos]||p.pos||'';
+  const acc=s.passAcc!=null?s.passAcc:(s.passes?Math.round((s.passes-(s.passes-s.passes))/Math.max(1,s.passes)*100):null);
+  const accPct=s.passAcc!=null?s.passAcc:null;
+  const bar=(v)=>Math.max(4,Math.min(100,v));
+  // صفوف القاع
+  const rows=[];
+  if(accPct!=null) rows.push(['دقة التمرير',accPct+'%',bar(accPct)]);
+  rows.push(['التمريرات',(s.passes||0)+(s.passKey?` · ${s.passKey} مفتاحية`:''),bar((s.passes||0)/120*100)]);
+  if(s.dribbles||s.dribbleAtt) rows.push(['مراوغات ناجحة',String(s.dribbles||0),bar((s.dribbles||0)/8*100)]);
+  if(s.tackles||s.interceptions) rows.push(['تدخلات/قطع',String((s.tackles||0)+(s.interceptions||0)),bar(((s.tackles||0)+(s.interceptions||0))/8*100)]);
+  if(s.fouls) rows.push(['أخطاء',String(s.fouls),bar(s.fouls/6*100)]);
+  const rowsHtml=rows.map(([k,v,w])=>`<div class="bc-row"><span class="rk">${k}</span><div class="rbar"><div class="rfill" style="width:${w}%"></div></div><span class="rv">${v}</span></div>`).join('');
+  const html=`<div class="bc" style="--team:${team};--team2:${team2}">
+    <div class="bc-bar">
+      <div class="bc-numbox"><span class="bc-num">${p.num||''}</span></div>
+      <div class="bc-who"><span class="bc-flag">${p.flag||''} ${p.teamAr||''}</span><span class="bc-name">${p.name||''}</span><span class="bc-pos">${posAr}${s.minutes?` · ${s.minutes} دقيقة`:''}</span></div>
+      <div class="bc-rate ${rateCls}"><span class="rv">${rateVal}</span><span class="rl">RATING</span></div>
+    </div>
+    <div class="bc-key">
+      <div class="cell"><div class="n g">${s.goals||0}</div><div class="l">أهداف</div></div>
+      <div class="cell"><div class="n">${s.assists||0}</div><div class="l">صناعة</div></div>
+      <div class="cell"><div class="n">${s.shots||0}</div><div class="l">تسديدات</div></div>
+      <div class="cell"><div class="n">${s.shotsOn||0}</div><div class="l">على المرمى</div></div>
+    </div>
+    <div class="bc-rows">${rowsHtml||'<div class="bc-empty">لا توجد تفاصيل إضافية لهذا اللاعب</div>'}</div>
+    <div class="bc-foot">WORLD CUP 2026 · إحصائيات المباراة</div>
+  </div>`;
+  let o=document.getElementById('pcOverlay');if(o)o.remove();
+  o=document.createElement('div');o.id='pcOverlay';o.className='pcoverlay';
+  o.innerHTML=`<div class="pcwrap"><button class="luclose" onclick="document.getElementById('pcOverlay').remove()">✕ إغلاق</button>${html}</div>`;
+  o.addEventListener('click',e=>{if(e.target===o)o.remove();});
+  document.body.appendChild(o);
 }
 function showLineupOverlay(inner){
   let o=document.getElementById('luOverlay');
