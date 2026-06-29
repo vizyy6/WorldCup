@@ -284,7 +284,9 @@
     .bc-row .rv{min-width:54px;font-size:15px}
     .pl{width:68px}.pl .nm{max-width:64px;font-size:8px}
   }
-  .ctrlbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+  .filterbox{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 16px;text-align:center}
+  .filterlabel{font-weight:800;font-size:13px;color:var(--mut);margin-bottom:10px;letter-spacing:1px}
+  .ctrlbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:0}
   .hidefin{display:inline-block;margin:0;padding:7px 14px;border-radius:20px;cursor:pointer;
     font-family:'Thmanyah';font-weight:700;font-size:12.5px;transition:.2s;
     background:linear-gradient(120deg,var(--accent),#00b389);color:#04221a;border:1px solid transparent}
@@ -352,9 +354,12 @@
     <input type="text" id="searchInput" placeholder="ابحث" oninput="onSearch(this.value)" autocomplete="off">
     <button id="searchClear" class="searchclear" onclick="clearSearch()" style="display:none" aria-label="مسح">✕</button>
   </div>
-  <div class="ctrlbar">
-    <button id="todayBtn" class="hidefin" onclick="toggleTodayOnly()">📅 اضغط لإظهار كل المباريات</button>
-    <button id="hideFinBtn" class="hidefin" onclick="toggleHideFinished()">اضغط لإظهار المباريات المنتهية</button>
+  <div class="filterbox">
+    <div class="filterlabel">الفلاتر</div>
+    <div class="ctrlbar">
+      <button id="todayBtn" class="hidefin" onclick="toggleTodayOnly()">📅 كل المباريات</button>
+      <button id="hideFinBtn" class="hidefin" onclick="toggleHideFinished()">إظهار المنتهية</button>
+    </div>
   </div>
   <div id="list"></div>
   <div class="empty" id="empty" style="display:none">ما فيه مباريات في هذا التصنيف.<span class="emptyhint">الرجاء التأكد من الفلاتر (اليوم / المباريات المنتهية).</span></div>
@@ -910,7 +915,7 @@ function toggleHideFinished(){
   if(b){
     // إظهار = أخضر، إخفاء = شفاف
     b.className='hidefin'+(hideFinished?'':' off');
-    b.textContent=hideFinished?'اضغط لإظهار المباريات المنتهية':'اضغط لإخفاء المباريات المنتهية';
+    b.textContent=hideFinished?'إظهار المنتهية':'إخفاء المنتهية';
   }
   render();
 }
@@ -919,7 +924,7 @@ function toggleTodayOnly(){
   const b=document.getElementById('todayBtn');
   if(b){
     b.className='hidefin'+(todayOnly?'':' off');
-    b.textContent=todayOnly?'📅 اضغط لإظهار كل المباريات':'📅 اضغط لعرض مباريات اليوم فقط';
+    b.textContent=todayOnly?'📅 كل المباريات':'📅 مباريات اليوم';
   }
   render();
 }
@@ -1007,6 +1012,12 @@ function render(){
   if(sbar)sbar.style.display=(curFilter==='all')?'flex':'none';
   if(hb)hb.style.display=(listView&&!searchQuery)?'inline-block':'none';
   if(tb)tb.style.display=(listView&&curFilter==='all'&&!searchQuery)?'inline-block':'none';
+  // أخفِ المستطيل كامل لو ما فيه أي زر ظاهر
+  const fbox=document.querySelector('.filterbox');
+  if(fbox){
+    const anyBtn=(hb&&hb.style.display!=='none')||(tb&&tb.style.display!=='none');
+    fbox.style.display=anyBtn?'block':'none';
+  }
   if(curFilter==='groups'){renderStandings();return;}
   if(curFilter==='scorers'){empty.style.display='none';renderScorers();return;}
   if(curFilter==='bracket'){empty.style.display='none';renderBracket();return;}
