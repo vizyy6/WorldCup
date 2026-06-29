@@ -301,6 +301,18 @@
   .bhd{font-weight:800;color:var(--accent);font-size:14px;padding:6px 2px;border-bottom:1px solid var(--line)}
   .bm{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
   .bm.bksa{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+  .bm.bclick{cursor:pointer;transition:.16s}
+  .bm.bclick:hover{background:var(--card-hi);border-color:var(--accent);transform:translateY(-1px)}
+  .bm .btap{margin-right:auto;color:var(--accent);font-weight:900;font-size:15px}
+  .bm .detbtn{margin-right:auto;display:inline-flex;align-items:center;gap:3px;background:rgba(0,224,164,.12);border:1px solid rgba(0,224,164,.4);color:var(--accent);font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:8px;font-family:'Thmanyah'}
+  .bm.bclick:hover .detbtn{background:rgba(0,224,164,.2)}
+  .bmeta{display:flex;align-items:center;gap:6px}
+  .mcoverlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:auto;backdrop-filter:blur(3px)}
+  .mcwrap{max-width:480px;width:100%;margin:auto}
+  .mcwrap .luclose{margin-bottom:12px}
+  .mctitle{text-align:center;color:var(--accent);font-weight:800;font-size:14px;margin-bottom:10px}
+  .mcwrap .match{cursor:default}
+  .mcwrap .match:hover{transform:none;background:var(--card)}
   .bnum{font-size:10px;color:var(--mut);font-weight:700;margin-bottom:5px;direction:rtl}
   .bteam{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;padding:3px 0}
   .bteam.bwin{color:var(--gold)}
@@ -879,6 +891,7 @@ function renderScorers(){
   list.appendChild(card);
 }
 function renderBracket(){
+  window.__BRACKETREG=[];
   const ROUNDS=[['r32','دور الـ32'],['r16','دور الـ16'],['qf','ربع النهائي'],['sf','نصف النهائي'],['final','النهائي']];
   const br=document.createElement('div');br.className='bracket';
   ROUNDS.forEach(([key,title])=>{
@@ -901,15 +914,23 @@ function renderBracket(){
       const status = (m.finished||(sc&&!m.liveNow)) ? `<span class="bft">انتهت</span>`
         : m.liveNow ? `<span class="blive">\u25cf مباشر</span>`
         : `${m.day} \u00b7 ${m.time} ${m.ap}`;
-      html+=`<div class="bm ${matchHasArab(m)?'bksa':''}">
+      const canOpen = !!m.t1;
+      let clickAttr='', tapHint='';
+      if(canOpen){
+        const bi=window.__BRACKETREG.length;
+        window.__BRACKETREG.push(m);
+        clickAttr=` onclick="openMatchCard(${bi})"`;
+        tapHint='<span class="detbtn">التفاصيل ›</span>';
+      }
+      html+=`<div class="bm ${matchHasArab(m)?'bksa':''} ${canOpen?'bclick':''}"${clickAttr}>
         ${m.num?`<div class="bnum">#${m.num}${m.grp==='م. الثالث'?' \u00b7 م. الثالث':''}</div>`:(m.grp==='م. الثالث'?`<div class="bnum">م. الثالث</div>`:'')}
-        ${inner}<div class="bmeta">${status}</div></div>`;
+        ${inner}<div class="bmeta">${status}${tapHint}</div></div>`;
     });
     col.innerHTML=html;br.appendChild(col);
   });
   list.appendChild(br);
   const hint=document.createElement('div');hint.className='leg';
-  hint.innerHTML='<span class="dotg"></span> اسحب يميناً ويساراً لاستعراض الأدوار — الفرق تتعبّى تلقائياً مع تقدم البطولة.';
+  hint.innerHTML='<span class="dotg"></span> اضغط أي مباراة محدّدة الفرق لعرض تفاصيلها · اسحب يميناً ويساراً لاستعراض الأدوار.';
   list.appendChild(hint);
 }
 function toggleHideFinished(){
@@ -1005,60 +1026,8 @@ function shareMatch(idx){
     }
   }
 }
-function render(){
-  window.__SHAREREG=[];
-  list.innerHTML='';
-  const hb=document.getElementById('hideFinBtn');
-  const tb=document.getElementById('todayBtn');
-  const listView=!(curFilter==='groups'||curFilter==='scorers'||curFilter==='bracket');
-  const sbar=document.getElementById('searchBar');
-  if(sbar)sbar.style.display=(curFilter==='all')?'flex':'none';
-  if(hb)hb.style.display=(listView&&!searchQuery)?'inline-block':'none';
-  if(tb)tb.style.display=(listView&&curFilter==='all'&&!searchQuery)?'inline-block':'none';
-  // أخفِ المستطيل كامل لو ما فيه أي زر ظاهر
-  const fbox=document.querySelector('.filterwrap');
-  if(fbox){
-    const anyBtn=(hb&&hb.style.display!=='none')||(tb&&tb.style.display!=='none');
-    fbox.style.display=anyBtn?'block':'none';
-  }
-  if(curFilter==='groups'){renderStandings();return;}
-  if(curFilter==='scorers'){empty.style.display='none';renderScorers();return;}
-  if(curFilter==='bracket'){empty.style.display='none';renderBracket();return;}
-  const _today=(()=>{const n=new Date();const u=new Date(n.getTime()+(n.getTimezoneOffset()+180)*60000);return u.getDate()+" "+MON[u.getMonth()];})();
-  const rows=DATA.filter(m=>{
-    if(searchQuery){
-      // عند البحث: ابحث في كل المباريات (تجاهل فلتر اليوم)، لكن طابق التصنيف الحالي
-      if(!matchHasQuery(m,searchQuery))return false;
-      if(curFilter==='ksa')return matchHasArab(m);
-      if(curFilter!=='all'&&curFilter!=='ksa')return m.stage===curFilter;
-      return true;
-    }
-    if(todayOnly && curFilter==='all' && m.day!==_today)return false;
-    if(hideFinished){
-      const isFin = m.finished || (m.score && !m.liveNow && !shouldBeLive(m));
-      if(isFin)return false;
-    }
-    if(curFilter==='all')return true;
-    if(curFilter==='ksa')return matchHasArab(m);
-    return m.stage===curFilter;
-  });
-  if(!rows.length){
-    empty.innerHTML = searchQuery
-      ? `ما فيه نتائج لـ "${searchQuery}".<span class="emptyhint">جرّب اسم منتخب آخر أو امسح البحث.</span>`
-      : `ما فيه مباريات في هذا التصنيف.<span class="emptyhint">الرجاء التأكد من الفلاتر (اليوم / المباريات المنتهية).</span>`;
-    empty.style.display='block';return;
-  }
-  empty.style.display='none';
-  let lastDay=null,dg=null;
-  const todayStr=(()=>{const n=new Date();const u=new Date(n.getTime()+(n.getTimezoneOffset()+180)*60000);return u.getDate()+" "+MON[u.getMonth()];})();
-  rows.forEach(m=>{
-    if(m.day!==lastDay){
-      dg=document.createElement('div');dg.className='daygroup';
-      const p=m.day.split(' ');
-      const isToday=m.day===todayStr;
-      dg.innerHTML=`<div class="dayhead${isToday?' today':''}"><span class="dnum">${p[0]}</span><span class="dwords">${p[1]}</span><span class="ddow">${m.dow}</span>${isToday?'<span class="todaybadge">اليوم</span>':''}</div>`;
-      list.appendChild(dg);lastDay=m.day;
-    }
+function buildMatchEl(m){
+  window.__SHAREREG=window.__SHAREREG||[];
     const isKsa=matchHasArab(m);
     // اسم وعلم المنتخب العربي في المباراة (للشارة)
     let arabBadge='';
@@ -1084,8 +1053,6 @@ function render(){
       const parts=m.t2[0].split(' × ');
       teamsHtml=`<div class="team" style="font-size:15px">${parts[0]}</div><div class="vs">×</div><div class="team" style="font-size:15px">${parts[1]||''}</div>`;
     }
-    const el=document.createElement('div');el.className='match'+(isKsa?' ksaM':'');
-    if(isKsa&&arabBadge){el.setAttribute('data-arab',arabBadge);}
     const stad=STAD[m.city]||'';
     const status = statusEarly;
     // الدقيقة من API-Football مباشرة (m.elapsed) — لا تقدير محلي حتى لا تنحرف عن الواقع
@@ -1152,7 +1119,7 @@ function render(){
     const shareIdx=window.__SHAREREG.length;
     window.__SHAREREG.push(buildShareText(m,label));
     const shareBtn=`<button class="shareic" id="shic${shareIdx}" onclick="event.stopPropagation();shareMatch(${shareIdx})" aria-label="مشاركة"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>`;
-    el.innerHTML=`${shareBtn}<div class="teams">${teamsHtml}</div>
+    const html=`${shareBtn}<div class="teams">${teamsHtml}</div>
       <div class="meta">${metaTop}
       ${stad?`<div class="stad">${stad}</div>`:''}
       <div class="city">${m.city}</div>
@@ -1163,6 +1130,67 @@ function render(){
       ${statsHtml}
       ${lineupBtn}
       ${probHtml}`;
+  return {cls:'match'+(isKsa?' ksaM':''), dataArab:(isKsa&&arabBadge)?arabBadge:null, html};
+}
+
+function render(){
+  window.__SHAREREG=[];
+  list.innerHTML='';
+  const hb=document.getElementById('hideFinBtn');
+  const tb=document.getElementById('todayBtn');
+  const listView=!(curFilter==='groups'||curFilter==='scorers'||curFilter==='bracket');
+  const sbar=document.getElementById('searchBar');
+  if(sbar)sbar.style.display=(curFilter==='all')?'flex':'none';
+  if(hb)hb.style.display=(listView&&!searchQuery)?'inline-block':'none';
+  if(tb)tb.style.display=(listView&&curFilter==='all'&&!searchQuery)?'inline-block':'none';
+  // أخفِ المستطيل كامل لو ما فيه أي زر ظاهر
+  const fbox=document.querySelector('.filterwrap');
+  if(fbox){
+    const anyBtn=(hb&&hb.style.display!=='none')||(tb&&tb.style.display!=='none');
+    fbox.style.display=anyBtn?'block':'none';
+  }
+  if(curFilter==='groups'){renderStandings();return;}
+  if(curFilter==='scorers'){empty.style.display='none';renderScorers();return;}
+  if(curFilter==='bracket'){empty.style.display='none';renderBracket();return;}
+  const _today=(()=>{const n=new Date();const u=new Date(n.getTime()+(n.getTimezoneOffset()+180)*60000);return u.getDate()+" "+MON[u.getMonth()];})();
+  const rows=DATA.filter(m=>{
+    if(searchQuery){
+      // عند البحث: ابحث في كل المباريات (تجاهل فلتر اليوم)، لكن طابق التصنيف الحالي
+      if(!matchHasQuery(m,searchQuery))return false;
+      if(curFilter==='ksa')return matchHasArab(m);
+      if(curFilter!=='all'&&curFilter!=='ksa')return m.stage===curFilter;
+      return true;
+    }
+    if(todayOnly && curFilter==='all' && m.day!==_today)return false;
+    if(hideFinished){
+      const isFin = m.finished || (m.score && !m.liveNow && !shouldBeLive(m));
+      if(isFin)return false;
+    }
+    if(curFilter==='all')return true;
+    if(curFilter==='ksa')return matchHasArab(m);
+    return m.stage===curFilter;
+  });
+  if(!rows.length){
+    empty.innerHTML = searchQuery
+      ? `ما فيه نتائج لـ "${searchQuery}".<span class="emptyhint">جرّب اسم منتخب آخر أو امسح البحث.</span>`
+      : `ما فيه مباريات في هذا التصنيف.<span class="emptyhint">الرجاء التأكد من الفلاتر (اليوم / المباريات المنتهية).</span>`;
+    empty.style.display='block';return;
+  }
+  empty.style.display='none';
+  let lastDay=null,dg=null;
+  const todayStr=(()=>{const n=new Date();const u=new Date(n.getTime()+(n.getTimezoneOffset()+180)*60000);return u.getDate()+" "+MON[u.getMonth()];})();
+  rows.forEach(m=>{
+    if(m.day!==lastDay){
+      dg=document.createElement('div');dg.className='daygroup';
+      const p=m.day.split(' ');
+      const isToday=m.day===todayStr;
+      dg.innerHTML=`<div class="dayhead${isToday?' today':''}"><span class="dnum">${p[0]}</span><span class="dwords">${p[1]}</span><span class="ddow">${m.dow}</span>${isToday?'<span class="todaybadge">اليوم</span>':''}</div>`;
+      list.appendChild(dg);lastDay=m.day;
+    }
+    const built=buildMatchEl(m);
+    const el=document.createElement('div');el.className=built.cls;
+    if(built.dataArab)el.setAttribute('data-arab',built.dataArab);
+    el.innerHTML=built.html;
     dg.appendChild(el);
   });
 }
@@ -1377,6 +1405,19 @@ function openPlayerCard(idx){
   let o=document.getElementById('pcOverlay');if(o)o.remove();
   o=document.createElement('div');o.id='pcOverlay';o.className='pcoverlay';
   o.innerHTML=`<div class="pcwrap"><button class="luclose" onclick="document.getElementById('pcOverlay').remove()">✕ إغلاق</button>${html}</div>`;
+  o.addEventListener('click',e=>{if(e.target===o)o.remove();});
+  document.body.appendChild(o);
+}
+function openMatchCard(idx){
+  const m=(window.__BRACKETREG||[])[idx];
+  if(!m)return;
+  const built=buildMatchEl(m);
+  const round=(ST[m.stage]&&ST[m.stage][1])||'';
+  let o=document.getElementById('mcOverlay');if(o)o.remove();
+  o=document.createElement('div');o.id='mcOverlay';o.className='mcoverlay';
+  o.innerHTML=`<div class="mcwrap"><button class="luclose" onclick="document.getElementById('mcOverlay').remove()">✕ إغلاق</button>`
+    +`<div class="mctitle">${m.grp&&m.grp[0]==='#'?'مباراة '+m.grp:(round||'')}</div>`
+    +`<div class="match ${built.cls.replace('match','')}"${built.dataArab?` data-arab="${built.dataArab}"`:''}>${built.html}</div></div>`;
   o.addEventListener('click',e=>{if(e.target===o)o.remove();});
   document.body.appendChild(o);
 }
