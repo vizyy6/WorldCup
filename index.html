@@ -104,6 +104,10 @@
   }
   .flag{font-size:22px;line-height:1;width:26px;text-align:center;flex:0 0 auto}
   .tlogo{width:24px;height:24px;object-fit:contain;vertical-align:middle;display:inline-block}
+  .grptbl .tlogo{width:18px;height:18px}
+  .bflag .tlogo{width:16px;height:16px}
+  .gflag .tlogo{width:15px;height:15px}
+  .bclogo{width:18px;height:18px;object-fit:contain;vertical-align:middle;display:inline-block}
   /* علامة الخروج */
   .tn.out{text-decoration:line-through;text-decoration-color:var(--accent2);text-decoration-thickness:2px;opacity:.62}
   .outtag{display:inline-block;font-size:9px;font-weight:800;color:#fff;background:var(--accent2);border-radius:5px;padding:1px 6px;margin:0 5px;vertical-align:middle;letter-spacing:.3px;box-shadow:0 1px 3px rgba(255,61,127,.4)}
@@ -671,6 +675,11 @@ function mergeScores(j){
     if(best.hlogo||best.alogo){
       m.logo1 = flip ? (best.alogo||'') : (best.hlogo||'');
       m.logo2 = flip ? (best.hlogo||'') : (best.alogo||'');
+      const arOf=x=>NAME[norm(x)]?NAME[norm(x)][0]:null;
+      const aH=arOf(best.h), aA=arOf(best.a);
+      if(aH && best.hlogo) LOGOS[aH]=best.hlogo;
+      if(aA && best.alogo) LOGOS[aA]=best.alogo;
+      saveLogos();
     }
     const ng=(best.goals||[]).map(g=>({
       side: flip ? (g.side==='h'?'a':'h') : g.side,
@@ -737,12 +746,25 @@ function showExport(){
 
 const list=document.getElementById('list'),empty=document.getElementById('empty');
 let DATA=fromFallback(), curFilter='all', hideFinished=true, todayOnly=true, searchQuery='';
+// خريطة شعارات المنتخبات (مفتاحها الاسم العربي) — تُعبّأ من بيانات المباريات وتُحفظ محلياً
+let LOGOS={};
+try{LOGOS=JSON.parse(localStorage.getItem('wc26-logos-v1')||'{}');}catch(e){LOGOS={};}
+function saveLogos(){try{localStorage.setItem('wc26-logos-v1',JSON.stringify(LOGOS));}catch(e){}}
+// شارة المنتخب: شعار حقيقي إن توفّر، وإلا إيموجي العلم (مع رجوع تلقائي عند فشل التحميل)
+function teamBadge(arName,emoji,cls){
+  cls=cls||'flag';
+  const lg=arName?LOGOS[arName]:null;
+  const fb=(emoji||'🏳️').replace(/'/g,'');
+  return lg
+    ? `<span class="${cls}"><img class="tlogo" src="${lg}" alt="" loading="lazy" onerror="this.parentElement.textContent='${fb}'"></span>`
+    : `<span class="${cls}">${emoji||'🏳️'}</span>`;
+}
 applyPrintedResults();
 applyGoalsCache();
 const ST={groups:["g","المجموعة"],r32:["k","دور 32"],r16:["k",""],qf:["k","ربع"],sf:["k","نصف"],final:["f","النهائي"]};
 
 function getEliminated(){
-  // مجموعة مفاتيح المنتخبات الخارجة (إنجليزي مُطبّع)
+  // مجموعة مفاتيح المنتخبات الخارجة (إنجليزي مُطبّع) — للشجرة (تشمل خسارة الإقصائيات)
   const elim=new Set();
   // ١) الإقصائيات: الخاسر في أي مباراة إقصائية منتهية
   DATA.forEach(m=>{
@@ -753,15 +775,29 @@ function getEliminated(){
     if(!fin||!sc||sc[0]===sc[1])return; // نتجاهل التعادل (الترجيح غير معروف)
     elim.add(norm(sc[0]<sc[1]?m.t1raw:m.t2raw));
   });
-  // ٢) المجموعات: الرابع (الأخير) بعد لعب كل الفرق ٣ مباريات — محافظ (لا نعلّم الثالث)
+  // ٢) أضف خارجي الدور الأول كذلك
+  getGroupEliminated().forEach(k=>elim.add(k));
+  return elim;
+}
+// خارجو الدور الأول فقط (للجدول): الرابع في كل مجموعة + أسوأ ٤ مراكز ثالثة
+function getGroupEliminated(){
+  const elim=new Set();
   const S=buildStandings();
-  Object.keys(S).forEach(g=>{
+  const groups=Object.keys(S);
+  const thirds=[];
+  groups.forEach(g=>{
     const rows=S[g];
+    // علّم فقط لما تلعب كل فرق المجموعة ٣ مباريات (انتهى الدور الأول لهذه المجموعة)
     if(rows.length>=4 && rows.every(t=>t.p>=3)){
-      const last=rows[rows.length-1];
-      if(last) elim.add(norm(last.key));
+      if(rows[3]) elim.add(norm(rows[3].key));   // الرابع: خارج دائماً
+      if(rows[2]) thirds.push(rows[2]);          // الثالث: مرشّح (حسب أفضل ٨)
     }
   });
+  // أفضل ٨ مراكز ثالثة يتأهلون؛ الباقي (أسوأ ٤) يخرجون — فقط لو اكتملت كل المجموعات الـ١٢
+  if(groups.length>=12 && thirds.length>=12){
+    thirds.sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+    thirds.slice(8).forEach(t=>elim.add(norm(t.key)));
+  }
   return elim;
 }
 function teamRow(t,sc,win,logo,elim){
@@ -795,12 +831,12 @@ function renderStandings(){
   lg.innerHTML='<span class="dotg"></span> أول منتخبين من كل مجموعة يتأهلون مباشرة، وأفضل ٨ مراكز ثالثة يلحقونهم لدور الـ٣٢.';
   list.appendChild(lg);
   const grid=document.createElement('div');grid.className='grpgrid';
-  const ELIM=getEliminated();
+  const ELIM=getGroupEliminated();
   keys.forEach(g=>{
     let rows='';
     S[g].forEach((t,i)=>{const gd=t.gf-t.ga,gds=(gd>0?'+':'')+gd,ksa=isArab(t.key),out=ELIM.has(norm(t.key));
       const nm=out?`<span class="tn out">${t.name}</span><span class="outtag">خروج</span>`:t.name;
-      rows+=`<tr class="${i<2?'adv':''} ${ksa?'ksaRow':''} ${out?'isout':''}"><td class="rk">${i+1}</td><td class="tm"><span class="flag">${t.flag}</span>${nm}</td><td>${t.p}</td><td>${gds}</td><td class="pts">${t.pts}</td></tr>`;});
+      rows+=`<tr class="${i<2?'adv':''} ${ksa?'ksaRow':''} ${out?'isout':''}"><td class="rk">${i+1}</td><td class="tm">${teamBadge(t.name,t.flag,'flag')}${nm}</td><td>${t.p}</td><td>${gds}</td><td class="pts">${t.pts}</td></tr>`;});
     const card=document.createElement('div');card.className='grpcard';
     card.innerHTML=`<div class="grphd">المجموعة ${g}</div><table class="grptbl"><thead><tr><th></th><th>المنتخب</th><th>لعب</th><th>+/-</th><th>نقاط</th></tr></thead><tbody>${rows}</tbody></table>`;
     grid.appendChild(card);
@@ -819,7 +855,7 @@ function renderScorers(){
     const nm=NAME[norm(p.team)],flag=nm?nm[1]:'\ud83c\udff3\ufe0f',tname=nm?nm[0]:p.team;
     const ksa=isArab(p.team);
     rows+=`<tr class="${i===0?'adv':''} ${ksa?'ksaRow':''}"><td class="rk">${i+1}</td>
-      <td class="tm"><span class="flag">${flag}</span><span>${p.name}<div class="tsub">${tname}</div></span></td>
+      <td class="tm">${teamBadge(tname,flag,'flag')}<span>${p.name}<div class="tsub">${tname}</div></span></td>
       <td>${p.assists||0}</td><td class="pts">${p.goals}</td></tr>`;
   });
   card.innerHTML=`<div class="grphd">\u26bd هدافو البطولة</div>
@@ -837,7 +873,7 @@ function renderBracket(){
     ms.forEach(m=>{
       const sc=m.score;
       const fin=m.finished||(sc&&!m.liveNow);
-      const line=(t,s,win,lose)=>`<div class="bteam ${win?'bwin':''} ${lose?'isout':''}"><span class="bflag">${t[1]||''}</span><span class="bname ${lose?'tn out':''}">${t[0]}</span>${lose?'<span class="outtag sm">خروج</span>':''}${s!=null?`<span class="bsc">${s}</span>`:''}</div>`;
+      const line=(t,s,win,lose)=>`<div class="bteam ${win?'bwin':''} ${lose?'isout':''}">${teamBadge(t[0],t[1],'bflag')}<span class="bname ${lose?'tn out':''}">${t[0]}</span>${lose?'<span class="outtag sm">خروج</span>':''}${s!=null?`<span class="bsc">${s}</span>`:''}</div>`;
       let inner;
       if(m.t1){
         const l1=fin&&sc&&sc[0]<sc[1], l2=fin&&sc&&sc[1]<sc[0];
@@ -1005,7 +1041,7 @@ function render(){
     let goalsHtml='';
     if(m.goals && m.goals.length){
       const LIMIT=3;
-      const row=(g,team)=>`<div class="grow ${g.side}"><span class="gflag">${team[1]||'⚽'}</span><span class="gname">${g.player}${g.pen?' (ج)':''}${g.og?' (خطأ)':''}</span><span class="gmin">${g.min}${g.plus?`+${g.plus}`:''}'</span></div>`;
+      const row=(g,team)=>`<div class="grow ${g.side}">${teamBadge(team[0],team[1]||'⚽','gflag')}<span class="gname">${g.player}${g.pen?' (ج)':''}${g.og?' (خطأ)':''}</span><span class="gmin">${g.min}${g.plus?`+${g.plus}`:''}'</span></div>`;
       const col=(side,team)=>{
         const gs=m.goals.filter(g=>g.side===side);
         const shown=gs.slice(0,LIMIT).map(g=>row(g,team)).join('');
@@ -1262,7 +1298,7 @@ function openPlayerCard(idx){
   const html=`<div class="bc" style="--team:${team};--team2:${team2}">
     <div class="bc-bar">
       <div class="bc-numbox"><span class="bc-num">${p.num||''}</span></div>
-      <div class="bc-who"><span class="bc-flag">${p.flag||''} ${p.teamAr||''}</span><span class="bc-name">${p.name||''}</span><span class="bc-pos">${posAr}${s.minutes?` · ${s.minutes} دقيقة`:''}</span></div>
+      <div class="bc-who"><span class="bc-flag">${(LOGOS[p.teamAr]?`<img class="bclogo" src="${LOGOS[p.teamAr]}" onerror="this.replaceWith(document.createTextNode('${(p.flag||'').replace(/'/g,'')}'))">`:(p.flag||''))} ${p.teamAr||''}</span><span class="bc-name">${p.name||''}</span><span class="bc-pos">${posAr}${s.minutes?` · ${s.minutes} دقيقة`:''}</span></div>
       <div class="bc-rate ${rateCls}"><span class="rv">${rateVal}</span><span class="rl">RATING</span></div>
     </div>
     <div class="bc-key">
