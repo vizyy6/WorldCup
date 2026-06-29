@@ -71,6 +71,13 @@
   .match{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:10px;
     display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;transition:.18s;position:relative;overflow:hidden}
   .match:hover{background:var(--card-hi);transform:translateY(-2px)}
+  /* زر المشاركة */
+  .shareic{position:absolute;top:8px;left:8px;z-index:5;width:28px;height:28px;border-radius:9px;
+    background:var(--bg2);border:1px solid var(--line);color:var(--mut);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0;transition:.18s}
+  .shareic:hover{color:var(--accent);border-color:var(--accent);background:rgba(0,224,164,.08)}
+  .shareic.copied{color:var(--accent);border-color:var(--accent)}
+  .match.ksaM .shareic{left:auto;right:8px}
   /* بطاقات المباراة */
   .cardszone{grid-column:1/-1;display:flex;justify-content:center;align-items:flex-start;gap:0;margin:10px 0 2px;padding-top:10px;border-top:1px solid var(--line)}
   .cardcol{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1;max-width:160px}
@@ -94,6 +101,7 @@
   .team.win .sc{color:var(--gold)}
   @media (max-width:520px){
     .match{grid-template-columns:1fr;gap:8px}
+    .teams{padding-left:36px}
     .meta{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px 10px;min-width:0;border-top:1px solid var(--line);padding-top:8px}
     .match.ksaM .meta{padding-top:8px}
     .time{font-size:24px}
@@ -951,7 +959,46 @@ function clearSearch(){
   const c=document.getElementById('searchClear');if(c)c.style.display='none';
   render();
 }
+// ===== المشاركة =====
+const SITE_URL="https://vizyy6.github.io/WorldCup/";
+function buildShareText(m,label){
+  const t1=m.t1?m.t1[0]:(m.t2?m.t2[0].split(' × ')[0]:'');
+  const t2=m.t2?(m.t1?m.t2[0]:m.t2[0].split(' × ')[1]||''):'';
+  const sc=m.score;
+  const fin=m.finished||(sc&&!m.liveNow);
+  let mid;
+  if(sc) mid=`${sc[0]} × ${sc[1]}`;
+  else mid='×';
+  let head=`${t1} ${mid} ${t2}`.trim();
+  let status='';
+  if(m.liveNow) status=`\n🔴 مباشر${m.elapsed?` · الدقيقة ${m.elapsed}`:''}`;
+  else if(fin) status=`\n✓ انتهت`;
+  else status=`\n🗓️ ${m.day} · ${m.time} ${m.ap} (توقيت الرياض)`;
+  const goals=(m.goals&&m.goals.length)?'\n⚽ '+m.goals.map(g=>`${g.player} ${g.min}'`).join('، '):'';
+  return `${head}${status}${goals}\n\n🏆 كأس العالم 2026\n${SITE_URL}`;
+}
+function shareMatch(idx){
+  const txt=(window.__SHAREREG||[])[idx];
+  if(!txt)return;
+  if(navigator.share){
+    navigator.share({title:'كأس العالم 2026',text:txt}).catch(()=>{});
+  }else{
+    // نسخ للحافظة على الكمبيوتر
+    const done=()=>{
+      const ic=document.getElementById('shic'+idx);
+      if(ic){const old=ic.innerHTML;ic.innerHTML='✓';ic.classList.add('copied');setTimeout(()=>{ic.innerHTML=old;ic.classList.remove('copied');},1500);}
+    };
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done).catch(()=>{});
+    }else{
+      const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();
+      try{document.execCommand('copy');done();}catch(e){}
+      ta.remove();
+    }
+  }
+}
 function render(){
+  window.__SHAREREG=[];
   list.innerHTML='';
   const hb=document.getElementById('hideFinBtn');
   const tb=document.getElementById('todayBtn');
@@ -1088,7 +1135,10 @@ function render(){
     if(m.fixtureId && m.t1 && m.t2){
       lineupBtn=`<button class="lineupbtn" onclick="openLineup(this,${m.fixtureId},'${(m.t1[1]||'').replace(/'/g,'')}','${(m.t2[1]||'').replace(/'/g,'')}')">👕 التشكيلة</button>`;
     }
-    el.innerHTML=`<div class="teams">${teamsHtml}</div>
+    const shareIdx=window.__SHAREREG.length;
+    window.__SHAREREG.push(buildShareText(m,label));
+    const shareBtn=`<button class="shareic" id="shic${shareIdx}" onclick="event.stopPropagation();shareMatch(${shareIdx})" aria-label="مشاركة"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>`;
+    el.innerHTML=`${shareBtn}<div class="teams">${teamsHtml}</div>
       <div class="meta">${metaTop}
       ${stad?`<div class="stad">${stad}</div>`:''}
       <div class="city">${m.city}</div>
