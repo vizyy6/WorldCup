@@ -142,11 +142,23 @@
   .plabels .pf{font-size:15px}
   .plabels .toq{font-size:9.5px;color:var(--mut)}
   .goals{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
-  .sowrap{grid-column:1/-1;margin-top:10px;padding-top:8px;border-top:2px solid var(--gold)}
-  .sohd{text-align:center;font-weight:800;font-size:12px;color:var(--gold);margin-bottom:6px;font-family:'Thmanyah'}
-  .sohd .sopen{background:rgba(255,203,69,.15);border:1px solid var(--gold);color:var(--gold);padding:1px 9px;border-radius:8px;margin-inline-start:6px;font-size:13px}
-  .sowrap .goals{margin-top:0;padding-top:0;border-top:none}
-  .gmin.so{color:var(--gold)}
+  .sowrap{grid-column:1/-1;margin-top:10px;padding-top:10px;border-top:2px solid var(--gold)}
+  .sktop{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:10px}
+  .sklabel{font-weight:800;font-size:12px;color:var(--gold);font-family:'Thmanyah'}
+  .skscore{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:900;color:var(--mut)}
+  .skscore .sknum.win{color:var(--gold)}
+  .skdash{color:var(--mut);font-size:18px}
+  .skgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .skcol{display:flex;flex-direction:column;gap:7px}
+  .sokick{display:flex;align-items:center;gap:9px}
+  .sokick.h{justify-content:flex-start;flex-direction:row-reverse}
+  .sokick.a{justify-content:flex-start}
+  .skname{font-size:13px;color:var(--txt)}
+  .sodot{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff}
+  .sodot.ok{background:#2e8b4f}
+  .sodot.miss{background:#b53b3b}
+  .sowin{text-align:center;margin-top:10px;font-weight:800;font-size:13px;color:var(--gold);font-family:'Thmanyah'}
+  .sowin b{color:var(--gold)}
   .gcol{display:flex;flex-direction:column;gap:4px;min-width:0}
   .grow{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--txt)}
   .grow.a{justify-content:flex-start;direction:ltr;text-align:left}
@@ -1093,8 +1105,10 @@ function buildMatchEl(m){
       if(wp) probHtml=`<div class="prob"><div class="pbar"><span class="pa" style="width:${wp[0]}%"></span><span class="pb" style="width:${wp[1]}%"></span></div><div class="plabels"><span class="va"><span class="pf">${m.t1[1]}</span>${wp[0]}%</span><span class="toq">توقع الفوز حسب ترتيب الفيفا</span><span class="vb">${wp[1]}%<span class="pf">${m.t2[1]}</span></span></div></div>`;
     }
     let goalsHtml='';
-    const regGoals=(m.goals||[]).filter(g=>!g.so);
-    const soGoals=(m.goals||[]).filter(g=>g.so);
+    // ركلة ترجيح = إمّا مُعلَّمة من المصدر، أو ركلة جزاء بالدقيقة 120+ في مباراة فيها ترجيح
+    const isSO=g=>g.so || (m.pens && g.pen && ((g.min||0)+(g.plus||0)/100)>=120);
+    const regGoals=(m.goals||[]).filter(g=>!isSO(g));
+    const soGoals=(m.goals||[]).filter(g=>isSO(g));
     if(regGoals.length){
       const LIMIT=3;
       const row=(g,team)=>`<div class="grow ${g.side}">${teamBadge(team[0],team[1]||'⚽','gflag')}<span class="gname">${g.player}${g.pen?' (ج)':''}${g.og?' (خطأ)':''}</span><span class="gmin">${g.min}${g.plus?`+${g.plus}`:''}'</span></div>`;
@@ -1107,13 +1121,28 @@ function buildMatchEl(m){
       };
       goalsHtml=`<div class="goals">${col('h',m.t1||['','⚽'])}${col('a',m.t2||['','⚽'])}</div>`;
     }
-    // قسم منفصل لركلات الترجيح
+    // قسم منفصل لركلات الترجيح — شكل الدوائر
     if(soGoals.length || m.pens){
-      const soRow=(g,team)=>`<div class="grow ${g.side}">${teamBadge(team[0],team[1]||'⚽','gflag')}<span class="gname">${g.player}</span><span class="gmin so">✓</span></div>`;
-      const soCol=(side,team)=>`<div class="gcol">${soGoals.filter(g=>g.side===side).map(g=>soRow(g,team)).join('')}</div>`;
-      const penScore=m.pens?`<span class="sopen">${m.pens[0]} – ${m.pens[1]}</span>`:'';
-      const body=soGoals.length?`<div class="goals">${soCol('h',m.t1||['','⚽'])}${soCol('a',m.t2||['','⚽'])}</div>`:'';
-      goalsHtml+=`<div class="sowrap"><div class="sohd">ركلات الترجيح ${penScore}</div>${body}</div>`;
+      const cntH=soGoals.filter(g=>g.side==='h').length, cntA=soGoals.filter(g=>g.side==='a').length;
+      let pH,pA;
+      if(soGoals.length){ pH=cntH; pA=cntA; }
+      else if(m.pens){ pH=m.pens[0]; pA=m.pens[1]; }
+      const dot='<span class="sodot ok">✓</span>';
+      const kickRow=(g)=> g.side==='h'
+        ? `<div class="sokick h"><span class="skname">${g.player}</span>${dot}</div>`
+        : `<div class="sokick a">${dot}<span class="skname">${g.player}</span></div>`;
+      const colH=`<div class="skcol">${soGoals.filter(g=>g.side==='h').map(kickRow).join('')}</div>`;
+      const colA=`<div class="skcol">${soGoals.filter(g=>g.side==='a').map(kickRow).join('')}</div>`;
+      const numH=(pH!=null)?`<span class="sknum ${pH>pA?'win':''}">${pH}</span>`:'';
+      const numA=(pA!=null)?`<span class="sknum ${pA>pH?'win':''}">${pA}</span>`:'';
+      const head=`<div class="sktop"><span class="sklabel">ركلات الترجيح</span><div class="skscore">${numH}<span class="skdash">–</span>${numA}</div></div>`;
+      let winLine='';
+      if(pH!=null && pH!==pA && m.t1 && m.t2){
+        const wTeam = pH>pA ? m.t1 : m.t2;
+        winLine=`<div class="sowin">تأهّل <b>${wTeam[0]}</b> ${wTeam[1]||''}</div>`;
+      }
+      const body=soGoals.length?`<div class="skgrid">${colH}${colA}</div>`:'';
+      goalsHtml+=`<div class="sowrap">${head}${body}${winLine}</div>`;
     }
     // بطاقات المباراة — تظهر دائماً للمباريات المباشرة والمنتهية (حتى لو صفر)
     let cardsHtml='';
