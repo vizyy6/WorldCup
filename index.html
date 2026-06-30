@@ -141,6 +141,11 @@
   .plabels .pf{font-size:15px}
   .plabels .toq{font-size:9.5px;color:var(--mut)}
   .goals{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+  .sowrap{grid-column:1/-1;margin-top:10px;padding-top:8px;border-top:2px solid var(--gold)}
+  .sohd{text-align:center;font-weight:800;font-size:12px;color:var(--gold);margin-bottom:6px;font-family:'Thmanyah'}
+  .sohd .sopen{background:rgba(255,203,69,.15);border:1px solid var(--gold);color:var(--gold);padding:1px 9px;border-radius:8px;margin-inline-start:6px;font-size:13px}
+  .sowrap .goals{margin-top:0;padding-top:0;border-top:none}
+  .gmin.so{color:var(--gold)}
   .gcol{display:flex;flex-direction:column;gap:4px;min-width:0}
   .grow{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--txt)}
   .grow.a{justify-content:flex-start;direction:ltr;text-align:left}
@@ -623,7 +628,7 @@ function applyPrintedResults(){
     if(r.goals && r.goals.length && !(m.goals&&m.goals.length)){
       m.goals=r.goals.map(g=>({
         side: flip?(g.side==='h'?'a':'h'):g.side,
-        player:g.player, min:g.min||0, plus:g.plus||0, pen:!!g.pen, og:!!g.og
+        player:g.player, min:g.min||0, plus:g.plus||0, pen:!!g.pen, og:!!g.og, so:!!g.so
       })).sort((x,y)=>(x.min+x.plus/10)-(y.min+y.plus/10));
     }
   });
@@ -714,7 +719,7 @@ function mergeScores(j){
     }
     const ng=(best.goals||[]).map(g=>({
       side: flip ? (g.side==='h'?'a':'h') : g.side,
-      player:g.player, min:g.min, plus:g.plus, pen:g.pen, og:g.og
+      player:g.player, min:g.min, plus:g.plus, pen:g.pen, og:g.og, so:g.so
     })).sort((x,y)=>(x.min+x.plus/10)-(y.min+y.plus/10));
     // لا تمسح المسجّلين المعروضين برد ناقص: تجاهل القائمة الفاضية لو عندنا قائمة فيها محتوى
     if(ng.length || !(m.goals&&m.goals.length)) m.goals=ng;
@@ -757,7 +762,7 @@ function buildResultsSnippet(){
     if(!m.t1raw||!m.t2raw)return;
     const fin = m.finished || (m.score && !m.liveNow);
     if(!fin||!m.score)return;
-    const g=(m.goals||[]).map(x=>`{side:"${x.side}",player:${JSON.stringify(x.player)},min:${x.min}${x.plus?`,plus:${x.plus}`:''}${x.pen?',pen:true':''}${x.og?',og:true':''}}`).join(',');
+    const g=(m.goals||[]).map(x=>`{side:"${x.side}",player:${JSON.stringify(x.player)},min:${x.min}${x.plus?`,plus:${x.plus}`:''}${x.pen?',pen:true':''}${x.og?',og:true':''}${x.so?',so:true':''}}`).join(',');
     lines.push(`  "${m.t1raw}|${m.t2raw}":{ft:[${m.score[0]},${m.score[1]}]${g?`,goals:[${g}]`:''}},`);
   });
   return 'const RESULTS={\n'+lines.join('\n')+'\n};';
@@ -1087,17 +1092,27 @@ function buildMatchEl(m){
       if(wp) probHtml=`<div class="prob"><div class="pbar"><span class="pa" style="width:${wp[0]}%"></span><span class="pb" style="width:${wp[1]}%"></span></div><div class="plabels"><span class="va"><span class="pf">${m.t1[1]}</span>${wp[0]}%</span><span class="toq">توقع الفوز حسب ترتيب الفيفا</span><span class="vb">${wp[1]}%<span class="pf">${m.t2[1]}</span></span></div></div>`;
     }
     let goalsHtml='';
-    if(m.goals && m.goals.length){
+    const regGoals=(m.goals||[]).filter(g=>!g.so);
+    const soGoals=(m.goals||[]).filter(g=>g.so);
+    if(regGoals.length){
       const LIMIT=3;
       const row=(g,team)=>`<div class="grow ${g.side}">${teamBadge(team[0],team[1]||'⚽','gflag')}<span class="gname">${g.player}${g.pen?' (ج)':''}${g.og?' (خطأ)':''}</span><span class="gmin">${g.min}${g.plus?`+${g.plus}`:''}'</span></div>`;
       const col=(side,team)=>{
-        const gs=m.goals.filter(g=>g.side===side);
+        const gs=regGoals.filter(g=>g.side===side);
         const shown=gs.slice(0,LIMIT).map(g=>row(g,team)).join('');
         const hidden=gs.slice(LIMIT).map(g=>row(g,team)).join('');
         const more=hidden?`<div class="gmorewrap" style="display:none">${hidden}</div><button class="gmore" onclick="this.previousElementSibling.style.display='block';this.remove()">+${gs.length-LIMIT} المزيد</button>`:'';
         return `<div class="gcol">${shown}${more}</div>`;
       };
       goalsHtml=`<div class="goals">${col('h',m.t1||['','⚽'])}${col('a',m.t2||['','⚽'])}</div>`;
+    }
+    // قسم منفصل لركلات الترجيح
+    if(soGoals.length || m.pens){
+      const soRow=(g,team)=>`<div class="grow ${g.side}">${teamBadge(team[0],team[1]||'⚽','gflag')}<span class="gname">${g.player}</span><span class="gmin so">✓</span></div>`;
+      const soCol=(side,team)=>`<div class="gcol">${soGoals.filter(g=>g.side===side).map(g=>soRow(g,team)).join('')}</div>`;
+      const penScore=m.pens?`<span class="sopen">${m.pens[0]} – ${m.pens[1]}</span>`:'';
+      const body=soGoals.length?`<div class="goals">${soCol('h',m.t1||['','⚽'])}${soCol('a',m.t2||['','⚽'])}</div>`:'';
+      goalsHtml+=`<div class="sowrap"><div class="sohd">ركلات الترجيح ${penScore}</div>${body}</div>`;
     }
     // بطاقات المباراة — تظهر دائماً للمباريات المباشرة والمنتهية (حتى لو صفر)
     let cardsHtml='';
