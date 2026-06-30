@@ -158,7 +158,7 @@
     border-radius:9px;padding:6px 12px;font-family:'Thmanyah';font-weight:700;font-size:12px;cursor:pointer;width:100%}
   .lineupbtn:hover{color:var(--txt)}
   /* لوحة التشكيلة */
-  .luoverlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:999;overflow:auto;padding:16px;display:flex;align-items:flex-start;justify-content:center}
+  .luoverlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1100;overflow:auto;padding:16px;display:flex;align-items:flex-start;justify-content:center}
   .lubox{max-width:480px;width:100%;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px;margin:auto}
   .luclose{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:20px;padding:6px 14px;font-family:'Thmanyah';font-weight:700;font-size:13px;cursor:pointer;margin-bottom:12px}
   .lu-head{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:10px}
@@ -238,7 +238,7 @@
   .lu-tip b{color:var(--accent)}
   .lu-tip.nostats{background:rgba(133,147,179,.10);border-color:var(--line);color:var(--mut)}
   /* بطاقة اللاعب — ستايل بث */
-  .pcoverlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(3px)}
+  .pcoverlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1200;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(3px)}
   .pcwrap{max-width:380px;width:100%}
   .pcwrap .luclose{margin-bottom:12px}
   .bc{background:#0d1426;border-radius:14px;overflow:hidden;box-shadow:0 16px 50px rgba(0,0,0,.6);border:1px solid #1e2a45}
@@ -307,6 +307,8 @@
   .bm .detbtn{margin-right:auto;display:inline-flex;align-items:center;gap:3px;background:rgba(0,224,164,.12);border:1px solid rgba(0,224,164,.4);color:var(--accent);font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:8px;font-family:'Thmanyah'}
   .bm.bclick:hover .detbtn{background:rgba(0,224,164,.2)}
   .bmeta{display:flex;align-items:center;gap:6px}
+  .bpen{font-size:10px;color:var(--mut);text-align:center;margin-top:3px;letter-spacing:.3px;opacity:.85}
+  .bpen.pend{color:#e0a93b}
   .mcoverlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:auto;backdrop-filter:blur(3px)}
   .mcwrap{max-width:480px;width:100%;margin:auto}
   .mcwrap .luclose{margin-bottom:12px}
@@ -695,6 +697,7 @@ function mergeScores(j){
     const c=x=>NAME[norm(x)]?NAME[norm(x)][0]:norm(x);
     const flip = c(best.h)!==c(m.t1raw);
     if(best.ft) m.score = flip?[best.ft[1],best.ft[0]]:best.ft.slice();
+    if(best.pens) m.pens = flip?[best.pens[1],best.pens[0]]:best.pens.slice();
     m.liveNow = best.status==='LIVE';
     m.finished = best.status==='FT';
     m.elapsed = best.elapsed||null;
@@ -800,7 +803,11 @@ function getEliminated(){
     if(!m.t1raw||!m.t2raw)return;
     const sc=m.score;
     const fin=m.finished||(sc&&!m.liveNow);
-    if(!fin||!sc||sc[0]===sc[1])return; // نتجاهل التعادل (الترجيح غير معروف)
+    if(!fin||!sc)return;
+    if(sc[0]===sc[1]){ // التعادل يُحسم بالترجيح إن توفّر
+      if(m.pens && m.pens[0]!==m.pens[1]) elim.add(norm(m.pens[0]<m.pens[1]?m.t1raw:m.t2raw));
+      return;
+    }
     elim.add(norm(sc[0]<sc[1]?m.t1raw:m.t2raw));
   });
   // ٢) أضف خارجي الدور الأول كذلك
@@ -902,11 +909,24 @@ function renderBracket(){
     ms.forEach(m=>{
       const sc=m.score;
       const fin=m.finished||(sc&&!m.liveNow);
+      const pens=m.pens;
+      const draw=sc&&sc[0]===sc[1];
       const line=(t,s,win,lose)=>`<div class="bteam ${win?'bwin':''} ${lose?'isout':''}">${teamBadge(t[0],t[1],'bflag')}<span class="bname ${lose?'tn out':''}">${t[0]}</span>${lose?'<span class="outtag sm">خروج</span>':''}${s!=null?`<span class="bsc">${s}</span>`:''}</div>`;
-      let inner;
+      let inner, penLine='';
       if(m.t1){
-        const l1=fin&&sc&&sc[0]<sc[1], l2=fin&&sc&&sc[1]<sc[0];
-        inner=line(m.t1,sc?sc[0]:null,sc&&m.finished&&sc[0]>sc[1],l1)+line(m.t2,sc?sc[1]:null,sc&&m.finished&&sc[1]>sc[0],l2);
+        let w1=false,w2=false,l1=false,l2=false;
+        if(fin&&sc){
+          if(draw&&pens){ // التعادل يُحسم بالترجيح
+            w1=pens[0]>pens[1]; w2=pens[1]>pens[0]; l1=pens[0]<pens[1]; l2=pens[1]<pens[0];
+            const hi=Math.max(pens[0],pens[1]), lo=Math.min(pens[0],pens[1]);
+            penLine=`<div class="bpen">ركلات الترجيح ${hi}–${lo}</div>`;
+          }else if(draw){ // تعادل منتهٍ بدون بيانات ترجيح بعد
+            penLine=`<div class="bpen pend">⏳ بانتظار حسم الترجيح</div>`;
+          }else if(m.finished){
+            w1=sc[0]>sc[1]; w2=sc[1]>sc[0]; l1=sc[0]<sc[1]; l2=sc[1]<sc[0];
+          }
+        }
+        inner=line(m.t1,sc?sc[0]:null,w1,l1)+line(m.t2,sc?sc[1]:null,w2,l2);
       }else{
         const parts=m.t2[0].split(' \u00d7 ');
         inner=`<div class="bteam bph">${parts[0]}</div><div class="bteam bph">${parts[1]||''}</div>`;
@@ -924,7 +944,7 @@ function renderBracket(){
       }
       html+=`<div class="bm ${matchHasArab(m)?'bksa':''} ${canOpen?'bclick':''}"${clickAttr}>
         ${m.num?`<div class="bnum">#${m.num}${m.grp==='م. الثالث'?' \u00b7 م. الثالث':''}</div>`:(m.grp==='م. الثالث'?`<div class="bnum">م. الثالث</div>`:'')}
-        ${inner}<div class="bmeta">${status}${tapHint}</div></div>`;
+        ${inner}${penLine}<div class="bmeta">${status}${tapHint}</div></div>`;
     });
     col.innerHTML=html;br.appendChild(col);
   });
